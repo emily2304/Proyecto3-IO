@@ -1,0 +1,1250 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{booktabs}
+\usepackage{colortbl}
+\usepackage{caption}
+\usepackage{multirow}
+\geometry{margin=1in}
+
+\usepackage{float}
+\definecolor{lightblue}{RGB}{200,230,255}
+\definecolor{lightgreen}{RGB}{220,255,220}
+\definecolor{lightred}{RGB}{255,220,220}
+\definecolor{lightyellow}{RGB}{255,255,200}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Algoritmo de Floyd - Solución}
+\fancyhead[R]{\thepage\ de \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{Proyecto 1: Rutas Optimas (Algoritmo de Floyd)}
+\author{Emily Sanchez \\ Viviana Vargas \\[1cm] Curso: Investigación de Operaciones \\ II Semestre 2025}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+\newpage
+\setcounter{page}{1}
+
+\section{Introducción}
+El algoritmo de Floyd-Warshall es un algoritmo para encontrar los caminos más cortos en un grafo ponderado. Fue publicado por Robert Floyd en 1962.\\
+El algoritmo de Floyd se basa en el principio de la Programación Dinámica.\\
+El algoritmo comienza con una tabla llamada G(0) que muestra las distancias directas entre cada nodo. Si dos nodos no están conectados directamente, la tabla marca esa distancia como infinito. Luego verifica si pasar por un nodo intermedio puede hacer que el camino entre dos nodos sea más corto.\\
+El proceso se repite hasta que todos los nodos intermedios posibles hayan sido probados (es decir, habrá una tabla G(k) para cada nodo k). Al final, la tabla P muestra la distancia más corta posible entre cada par de nodos.\\
+Podemos visualizar estos problemas con distancias entre ciudades: ¿qué pasa si quiero ir directamente de la ciudad A a la ciudad C? ¿Sería más corto ir directamente de A a C o ir de A a B y de B a C?\\
+\textbf{Complejidad espacial:} $O(n^2)$\\
+\textbf{Complejidad temporal:} $O(n^3)$\\
+\clearpage
+\section{Descripción del Problema}
+Grafo con 16 nodos:
+
+\begin{itemize}
+\item Nodo A: A
+\item Nodo B: B
+\item Nodo C: C
+\item Nodo D: D
+\item Nodo E: E
+\item Nodo F: F
+\item Nodo G: G
+\item Nodo H: H
+\item Nodo I: I
+\item Nodo J: J
+\item Nodo K: K
+\item Nodo L: L
+\item Nodo M: M
+\item Nodo N: N
+\item Nodo O: O
+\item Nodo P: P
+\end{itemize}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.5\textwidth,keepaspectratio]{grafo.png}
+\caption{Representación del grafo original}
+\end{figure}
+
+\clearpage
+\section{Procedimiento del Algoritmo}
+\subsection{Matriz de Distancias Inicial D(0)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & 0 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 15 & 16 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\\hline
+B & $\infty$ & 0 & $\infty$ & $\infty$ & $\infty$ & 27 & $\infty$ & $\infty$ & $\infty$ & 22 & 8 & $\infty$ & $\infty$ & $\infty$ & 5 & 8 \\\hline
+C & $\infty$ & $\infty$ & 0 & 5 & 88 & 9 & 5 & $\infty$ & 67 & 9 & 3 & $\infty$ & 7 & 9 & $\infty$ & $\infty$ \\\hline
+D & 41 & $\infty$ & $\infty$ & 0 & 6 & 7 & 12 & 66 & 9 & 31 & 45 & $\infty$ & 6 & 6 & $\infty$ & $\infty$ \\\hline
+E & 0 & 42 & $\infty$ & $\infty$ & 0 & 11 & 21 & $\infty$ & $\infty$ & 9 & 7 & 12 & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\\hline
+F & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 0 & 1 & $\infty$ & $\infty$ & $\infty$ & 9 & 1 & 23 & 56 & $\infty$ & $\infty$ \\\hline
+G & 1 & $\infty$ & 78 & $\infty$ & $\infty$ & $\infty$ & 0 & $\infty$ & $\infty$ & $\infty$ & 17 & $\infty$ & $\infty$ & 2 & $\infty$ & $\infty$ \\\hline
+H & 2 & 65 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 0 & $\infty$ & $\infty$ & $\infty$ & 23 & $\infty$ & 3 & $\infty$ & $\infty$ \\\hline
+I & 98 & $\infty$ & 21 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 0 & $\infty$ & $\infty$ & 67 & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\\hline
+J & 65 & $\infty$ & 22 & 27 & 35 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 0 & 90 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\\hline
+K & 22 & 1 & 1 & $\infty$ & 33 & $\infty$ & 89 & $\infty$ & $\infty$ & $\infty$ & 0 & 12 & $\infty$ & 89 & $\infty$ & $\infty$ \\\hline
+L & 2 & 4 & $\infty$ & $\infty$ & 1 & $\infty$ & 1 & 22 & $\infty$ & $\infty$ & 42 & 0 & $\infty$ & $\infty$ & $\infty$ & 51 \\\hline
+M & 4 & 7 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 4 & 5 & 9 & 100 & 55 & $\infty$ & 0 & $\infty$ & 25 & $\infty$ \\\hline
+N & $\infty$ & 6 & $\infty$ & 62 & $\infty$ & $\infty$ & 13 & $\infty$ & 15 & 21 & 3 & $\infty$ & $\infty$ & 0 & $\infty$ & $\infty$ \\\hline
+O & 5 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 9 & $\infty$ & $\infty$ & 22 & $\infty$ & $\infty$ & 2 & 0 & $\infty$ \\\hline
+P & 4 & 6 & 9 & 0 & 11 & 2 & 3 & 13 & 71 & 22 & 11 & 15 & 3 & 0 & 9 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias inicial D(0)}
+\end{table}
+
+\clearpage
+\subsection{Matriz de Caminos Inicial P(0)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & - & - & - & - & - & - & - & - & - & A & A & - & - & - & - & - \\\hline
+B & - & - & - & - & - & B & - & - & - & B & B & - & - & - & B & B \\\hline
+C & - & - & - & C & C & C & C & - & C & C & C & - & C & C & - & - \\\hline
+D & D & - & - & - & D & D & D & D & D & D & D & - & D & D & - & - \\\hline
+E & E & E & - & - & - & E & E & - & - & E & E & E & - & - & - & - \\\hline
+F & - & - & - & - & - & - & F & - & - & - & F & F & F & F & - & - \\\hline
+G & G & - & G & - & - & - & - & - & - & - & G & - & - & G & - & - \\\hline
+H & H & H & - & - & - & - & - & - & - & - & - & H & - & H & - & - \\\hline
+I & I & - & I & - & - & - & - & - & - & - & - & I & - & - & - & - \\\hline
+J & J & - & J & J & J & - & - & - & - & - & J & - & - & - & - & - \\\hline
+K & K & K & K & - & K & - & K & - & - & - & - & K & - & K & - & - \\\hline
+L & L & L & - & - & L & - & L & L & - & - & L & - & - & - & - & L \\\hline
+M & M & M & - & - & - & - & M & M & M & M & M & - & - & - & M & - \\\hline
+N & - & N & - & N & - & - & N & - & N & N & N & - & - & - & - & - \\\hline
+O & O & - & - & - & - & - & - & O & - & - & O & - & - & O & - & - \\\hline
+P & P & P & P & P & P & P & P & P & P & P & P & P & P & P & P & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos inicial P(0)}
+\end{table}
+
+\clearpage
+\subsection{Iteraciones del Algoritmo}
+\subsubsection{Iteración 1 (k = 1) - Nodo intermedio: A}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & 0 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 15 & 16 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\\hline
+B & $\infty$ & 0 & $\infty$ & $\infty$ & $\infty$ & 27 & $\infty$ & $\infty$ & $\infty$ & 22 & 8 & $\infty$ & $\infty$ & $\infty$ & 5 & 8 \\\hline
+C & $\infty$ & $\infty$ & 0 & 5 & 88 & 9 & 5 & $\infty$ & 67 & 9 & 3 & $\infty$ & 7 & 9 & $\infty$ & $\infty$ \\\hline
+D & 41 & $\infty$ & $\infty$ & 0 & 6 & 7 & 12 & 66 & 9 & 31 & 45 & $\infty$ & 6 & 6 & $\infty$ & $\infty$ \\\hline
+E & 0 & 42 & $\infty$ & $\infty$ & 0 & 11 & 21 & $\infty$ & $\infty$ & 9 & 7 & 12 & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\\hline
+F & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 0 & 1 & $\infty$ & $\infty$ & $\infty$ & 9 & 1 & 23 & 56 & $\infty$ & $\infty$ \\\hline
+G & 1 & $\infty$ & 78 & $\infty$ & $\infty$ & $\infty$ & 0 & $\infty$ & $\infty$ & \cellcolor{lightgreen} 16 & 17 & $\infty$ & $\infty$ & 2 & $\infty$ & $\infty$ \\\hline
+H & 2 & 65 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 0 & $\infty$ & \cellcolor{lightgreen} 17 & \cellcolor{lightgreen} 18 & 23 & $\infty$ & 3 & $\infty$ & $\infty$ \\\hline
+I & 98 & $\infty$ & 21 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 0 & \cellcolor{lightgreen} 113 & \cellcolor{lightgreen} 114 & 67 & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\\hline
+J & 65 & $\infty$ & 22 & 27 & 35 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 0 & \cellcolor{lightgreen} 81 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\\hline
+K & 22 & 1 & 1 & $\infty$ & 33 & $\infty$ & 89 & $\infty$ & $\infty$ & \cellcolor{lightgreen} 37 & 0 & 12 & $\infty$ & 89 & $\infty$ & $\infty$ \\\hline
+L & 2 & 4 & $\infty$ & $\infty$ & 1 & $\infty$ & 1 & 22 & $\infty$ & \cellcolor{lightgreen} 17 & \cellcolor{lightgreen} 18 & 0 & $\infty$ & $\infty$ & $\infty$ & 51 \\\hline
+M & 4 & 7 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 4 & 5 & 9 & \cellcolor{lightgreen} 19 & \cellcolor{lightgreen} 20 & $\infty$ & 0 & $\infty$ & 25 & $\infty$ \\\hline
+N & $\infty$ & 6 & $\infty$ & 62 & $\infty$ & $\infty$ & 13 & $\infty$ & 15 & 21 & 3 & $\infty$ & $\infty$ & 0 & $\infty$ & $\infty$ \\\hline
+O & 5 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 9 & $\infty$ & \cellcolor{lightgreen} 20 & \cellcolor{lightgreen} 21 & $\infty$ & $\infty$ & 2 & 0 & $\infty$ \\\hline
+P & 4 & 6 & 9 & 0 & 11 & 2 & 3 & 13 & 71 & \cellcolor{lightgreen} 19 & 11 & 15 & 3 & 0 & 9 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(1) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & - & - & - & - & - & - & - & - & - & A & A & - & - & - & - & - \\\hline
+B & - & - & - & - & - & B & - & - & - & B & B & - & - & - & B & B \\\hline
+C & - & - & - & C & C & C & C & - & C & C & C & - & C & C & - & - \\\hline
+D & D & - & - & - & D & D & D & D & D & D & D & - & D & D & - & - \\\hline
+E & E & E & - & - & - & E & E & - & - & E & E & E & - & - & - & - \\\hline
+F & - & - & - & - & - & - & F & - & - & - & F & F & F & F & - & - \\\hline
+G & G & - & G & - & - & - & - & - & - & \cellcolor{lightblue} A & G & - & - & G & - & - \\\hline
+H & H & H & - & - & - & - & - & - & - & \cellcolor{lightblue} A & \cellcolor{lightblue} A & H & - & H & - & - \\\hline
+I & I & - & I & - & - & - & - & - & - & \cellcolor{lightblue} A & \cellcolor{lightblue} A & I & - & - & - & - \\\hline
+J & J & - & J & J & J & - & - & - & - & - & \cellcolor{lightblue} A & - & - & - & - & - \\\hline
+K & K & K & K & - & K & - & K & - & - & \cellcolor{lightblue} A & - & K & - & K & - & - \\\hline
+L & L & L & - & - & L & - & L & L & - & \cellcolor{lightblue} A & \cellcolor{lightblue} A & - & - & - & - & L \\\hline
+M & M & M & - & - & - & - & M & M & M & \cellcolor{lightblue} A & \cellcolor{lightblue} A & - & - & - & M & - \\\hline
+N & - & N & - & N & - & - & N & - & N & N & N & - & - & - & - & - \\\hline
+O & O & - & - & - & - & - & - & O & - & \cellcolor{lightblue} A & \cellcolor{lightblue} A & - & - & O & - & - \\\hline
+P & P & P & P & P & P & P & P & P & P & \cellcolor{lightblue} A & P & P & P & P & P & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(1) - Cambios resaltados en azul}
+\end{table}
+
+\subsubsection{Iteración 2 (k = 2) - Nodo intermedio: B}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & 0 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 15 & 16 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\\hline
+B & $\infty$ & 0 & $\infty$ & $\infty$ & $\infty$ & 27 & $\infty$ & $\infty$ & $\infty$ & 22 & 8 & $\infty$ & $\infty$ & $\infty$ & 5 & 8 \\\hline
+C & $\infty$ & $\infty$ & 0 & 5 & 88 & 9 & 5 & $\infty$ & 67 & 9 & 3 & $\infty$ & 7 & 9 & $\infty$ & $\infty$ \\\hline
+D & 41 & $\infty$ & $\infty$ & 0 & 6 & 7 & 12 & 66 & 9 & 31 & 45 & $\infty$ & 6 & 6 & $\infty$ & $\infty$ \\\hline
+E & 0 & 42 & $\infty$ & $\infty$ & 0 & 11 & 21 & $\infty$ & $\infty$ & 9 & 7 & 12 & $\infty$ & $\infty$ & \cellcolor{lightgreen} 47 & \cellcolor{lightgreen} 50 \\\hline
+F & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 0 & 1 & $\infty$ & $\infty$ & $\infty$ & 9 & 1 & 23 & 56 & $\infty$ & $\infty$ \\\hline
+G & 1 & $\infty$ & 78 & $\infty$ & $\infty$ & $\infty$ & 0 & $\infty$ & $\infty$ & 16 & 17 & $\infty$ & $\infty$ & 2 & $\infty$ & $\infty$ \\\hline
+H & 2 & 65 & $\infty$ & $\infty$ & $\infty$ & \cellcolor{lightgreen} 92 & $\infty$ & 0 & $\infty$ & 17 & 18 & 23 & $\infty$ & 3 & \cellcolor{lightgreen} 70 & \cellcolor{lightgreen} 73 \\\hline
+I & 98 & $\infty$ & 21 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 0 & 113 & 114 & 67 & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\\hline
+J & 65 & $\infty$ & 22 & 27 & 35 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 0 & 81 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\\hline
+K & 22 & 1 & 1 & $\infty$ & 33 & \cellcolor{lightgreen} 28 & 89 & $\infty$ & $\infty$ & \cellcolor{lightgreen} 23 & 0 & 12 & $\infty$ & 89 & \cellcolor{lightgreen} 6 & \cellcolor{lightgreen} 9 \\\hline
+L & 2 & 4 & $\infty$ & $\infty$ & 1 & \cellcolor{lightgreen} 31 & 1 & 22 & $\infty$ & 17 & \cellcolor{lightgreen} 12 & 0 & $\infty$ & $\infty$ & \cellcolor{lightgreen} 9 & \cellcolor{lightgreen} 12 \\\hline
+M & 4 & 7 & $\infty$ & $\infty$ & $\infty$ & \cellcolor{lightgreen} 34 & 4 & 5 & 9 & 19 & \cellcolor{lightgreen} 15 & $\infty$ & 0 & $\infty$ & \cellcolor{lightgreen} 12 & \cellcolor{lightgreen} 15 \\\hline
+N & $\infty$ & 6 & $\infty$ & 62 & $\infty$ & \cellcolor{lightgreen} 33 & 13 & $\infty$ & 15 & 21 & 3 & $\infty$ & $\infty$ & 0 & \cellcolor{lightgreen} 11 & \cellcolor{lightgreen} 14 \\\hline
+O & 5 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 9 & $\infty$ & 20 & 21 & $\infty$ & $\infty$ & 2 & 0 & $\infty$ \\\hline
+P & 4 & 6 & 9 & 0 & 11 & 2 & 3 & 13 & 71 & 19 & 11 & 15 & 3 & 0 & 9 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(2) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & - & - & - & - & - & - & - & - & - & A & A & - & - & - & - & - \\\hline
+B & - & - & - & - & - & B & - & - & - & B & B & - & - & - & B & B \\\hline
+C & - & - & - & C & C & C & C & - & C & C & C & - & C & C & - & - \\\hline
+D & D & - & - & - & D & D & D & D & D & D & D & - & D & D & - & - \\\hline
+E & E & E & - & - & - & E & E & - & - & E & E & E & - & - & \cellcolor{lightblue} B & \cellcolor{lightblue} B \\\hline
+F & - & - & - & - & - & - & F & - & - & - & F & F & F & F & - & - \\\hline
+G & G & - & G & - & - & - & - & - & - & A & G & - & - & G & - & - \\\hline
+H & H & H & - & - & - & \cellcolor{lightblue} B & - & - & - & A & A & H & - & H & \cellcolor{lightblue} B & \cellcolor{lightblue} B \\\hline
+I & I & - & I & - & - & - & - & - & - & A & A & I & - & - & - & - \\\hline
+J & J & - & J & J & J & - & - & - & - & - & A & - & - & - & - & - \\\hline
+K & K & K & K & - & K & \cellcolor{lightblue} B & K & - & - & \cellcolor{lightblue} B & - & K & - & K & \cellcolor{lightblue} B & \cellcolor{lightblue} B \\\hline
+L & L & L & - & - & L & \cellcolor{lightblue} B & L & L & - & A & \cellcolor{lightblue} B & - & - & - & \cellcolor{lightblue} B & \cellcolor{lightblue} B \\\hline
+M & M & M & - & - & - & \cellcolor{lightblue} B & M & M & M & A & \cellcolor{lightblue} B & - & - & - & \cellcolor{lightblue} B & \cellcolor{lightblue} B \\\hline
+N & - & N & - & N & - & \cellcolor{lightblue} B & N & - & N & N & N & - & - & - & \cellcolor{lightblue} B & \cellcolor{lightblue} B \\\hline
+O & O & - & - & - & - & - & - & O & - & A & A & - & - & O & - & - \\\hline
+P & P & P & P & P & P & P & P & P & P & A & P & P & P & P & P & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(2) - Cambios resaltados en azul}
+\end{table}
+
+\subsubsection{Iteración 3 (k = 3) - Nodo intermedio: C}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & 0 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 15 & 16 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\\hline
+B & $\infty$ & 0 & $\infty$ & $\infty$ & $\infty$ & 27 & $\infty$ & $\infty$ & $\infty$ & 22 & 8 & $\infty$ & $\infty$ & $\infty$ & 5 & 8 \\\hline
+C & $\infty$ & $\infty$ & 0 & 5 & 88 & 9 & 5 & $\infty$ & 67 & 9 & 3 & $\infty$ & 7 & 9 & $\infty$ & $\infty$ \\\hline
+D & 41 & $\infty$ & $\infty$ & 0 & 6 & 7 & 12 & 66 & 9 & 31 & 45 & $\infty$ & 6 & 6 & $\infty$ & $\infty$ \\\hline
+E & 0 & 42 & $\infty$ & $\infty$ & 0 & 11 & 21 & $\infty$ & $\infty$ & 9 & 7 & 12 & $\infty$ & $\infty$ & 47 & 50 \\\hline
+F & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 0 & 1 & $\infty$ & $\infty$ & $\infty$ & 9 & 1 & 23 & 56 & $\infty$ & $\infty$ \\\hline
+G & 1 & $\infty$ & 78 & \cellcolor{lightgreen} 83 & \cellcolor{lightgreen} 166 & \cellcolor{lightgreen} 87 & 0 & $\infty$ & \cellcolor{lightgreen} 145 & 16 & 17 & $\infty$ & \cellcolor{lightgreen} 85 & 2 & $\infty$ & $\infty$ \\\hline
+H & 2 & 65 & $\infty$ & $\infty$ & $\infty$ & 92 & $\infty$ & 0 & $\infty$ & 17 & 18 & 23 & $\infty$ & 3 & 70 & 73 \\\hline
+I & 98 & $\infty$ & 21 & \cellcolor{lightgreen} 26 & \cellcolor{lightgreen} 109 & \cellcolor{lightgreen} 30 & \cellcolor{lightgreen} 26 & $\infty$ & 0 & \cellcolor{lightgreen} 30 & \cellcolor{lightgreen} 24 & 67 & \cellcolor{lightgreen} 28 & \cellcolor{lightgreen} 30 & $\infty$ & $\infty$ \\\hline
+J & 65 & $\infty$ & 22 & 27 & 35 & \cellcolor{lightgreen} 31 & \cellcolor{lightgreen} 27 & $\infty$ & \cellcolor{lightgreen} 89 & 0 & \cellcolor{lightgreen} 25 & $\infty$ & \cellcolor{lightgreen} 29 & \cellcolor{lightgreen} 31 & $\infty$ & $\infty$ \\\hline
+K & 22 & 1 & 1 & \cellcolor{lightgreen} 6 & 33 & \cellcolor{lightgreen} 10 & \cellcolor{lightgreen} 6 & $\infty$ & \cellcolor{lightgreen} 68 & \cellcolor{lightgreen} 10 & 0 & 12 & \cellcolor{lightgreen} 8 & \cellcolor{lightgreen} 10 & 6 & 9 \\\hline
+L & 2 & 4 & $\infty$ & $\infty$ & 1 & 31 & 1 & 22 & $\infty$ & 17 & 12 & 0 & $\infty$ & $\infty$ & 9 & 12 \\\hline
+M & 4 & 7 & $\infty$ & $\infty$ & $\infty$ & 34 & 4 & 5 & 9 & 19 & 15 & $\infty$ & 0 & $\infty$ & 12 & 15 \\\hline
+N & $\infty$ & 6 & $\infty$ & 62 & $\infty$ & 33 & 13 & $\infty$ & 15 & 21 & 3 & $\infty$ & $\infty$ & 0 & 11 & 14 \\\hline
+O & 5 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 9 & $\infty$ & 20 & 21 & $\infty$ & $\infty$ & 2 & 0 & $\infty$ \\\hline
+P & 4 & 6 & 9 & 0 & 11 & 2 & 3 & 13 & 71 & \cellcolor{lightgreen} 18 & 11 & 15 & 3 & 0 & 9 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(3) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & - & - & - & - & - & - & - & - & - & A & A & - & - & - & - & - \\\hline
+B & - & - & - & - & - & B & - & - & - & B & B & - & - & - & B & B \\\hline
+C & - & - & - & C & C & C & C & - & C & C & C & - & C & C & - & - \\\hline
+D & D & - & - & - & D & D & D & D & D & D & D & - & D & D & - & - \\\hline
+E & E & E & - & - & - & E & E & - & - & E & E & E & - & - & B & B \\\hline
+F & - & - & - & - & - & - & F & - & - & - & F & F & F & F & - & - \\\hline
+G & G & - & G & \cellcolor{lightblue} C & \cellcolor{lightblue} C & \cellcolor{lightblue} C & - & - & \cellcolor{lightblue} C & A & G & - & \cellcolor{lightblue} C & G & - & - \\\hline
+H & H & H & - & - & - & B & - & - & - & A & A & H & - & H & B & B \\\hline
+I & I & - & I & \cellcolor{lightblue} C & \cellcolor{lightblue} C & \cellcolor{lightblue} C & \cellcolor{lightblue} C & - & - & \cellcolor{lightblue} C & \cellcolor{lightblue} C & I & \cellcolor{lightblue} C & \cellcolor{lightblue} C & - & - \\\hline
+J & J & - & J & J & J & \cellcolor{lightblue} C & \cellcolor{lightblue} C & - & \cellcolor{lightblue} C & - & \cellcolor{lightblue} C & - & \cellcolor{lightblue} C & \cellcolor{lightblue} C & - & - \\\hline
+K & K & K & K & \cellcolor{lightblue} C & K & \cellcolor{lightblue} C & \cellcolor{lightblue} C & - & \cellcolor{lightblue} C & \cellcolor{lightblue} C & - & K & \cellcolor{lightblue} C & \cellcolor{lightblue} C & B & B \\\hline
+L & L & L & - & - & L & B & L & L & - & A & B & - & - & - & B & B \\\hline
+M & M & M & - & - & - & B & M & M & M & A & B & - & - & - & B & B \\\hline
+N & - & N & - & N & - & B & N & - & N & N & N & - & - & - & B & B \\\hline
+O & O & - & - & - & - & - & - & O & - & A & A & - & - & O & - & - \\\hline
+P & P & P & P & P & P & P & P & P & P & \cellcolor{lightblue} C & P & P & P & P & P & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(3) - Cambios resaltados en azul}
+\end{table}
+
+\subsubsection{Iteración 4 (k = 4) - Nodo intermedio: D}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & 0 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 15 & 16 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\\hline
+B & $\infty$ & 0 & $\infty$ & $\infty$ & $\infty$ & 27 & $\infty$ & $\infty$ & $\infty$ & 22 & 8 & $\infty$ & $\infty$ & $\infty$ & 5 & 8 \\\hline
+C & \cellcolor{lightgreen} 46 & $\infty$ & 0 & 5 & \cellcolor{lightgreen} 11 & 9 & 5 & \cellcolor{lightgreen} 71 & \cellcolor{lightgreen} 14 & 9 & 3 & $\infty$ & 7 & 9 & $\infty$ & $\infty$ \\\hline
+D & 41 & $\infty$ & $\infty$ & 0 & 6 & 7 & 12 & 66 & 9 & 31 & 45 & $\infty$ & 6 & 6 & $\infty$ & $\infty$ \\\hline
+E & 0 & 42 & $\infty$ & $\infty$ & 0 & 11 & 21 & $\infty$ & $\infty$ & 9 & 7 & 12 & $\infty$ & $\infty$ & 47 & 50 \\\hline
+F & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 0 & 1 & $\infty$ & $\infty$ & $\infty$ & 9 & 1 & 23 & 56 & $\infty$ & $\infty$ \\\hline
+G & 1 & $\infty$ & 78 & 83 & \cellcolor{lightgreen} 89 & 87 & 0 & \cellcolor{lightgreen} 149 & \cellcolor{lightgreen} 92 & 16 & 17 & $\infty$ & 85 & 2 & $\infty$ & $\infty$ \\\hline
+H & 2 & 65 & $\infty$ & $\infty$ & $\infty$ & 92 & $\infty$ & 0 & $\infty$ & 17 & 18 & 23 & $\infty$ & 3 & 70 & 73 \\\hline
+I & \cellcolor{lightgreen} 67 & $\infty$ & 21 & 26 & \cellcolor{lightgreen} 32 & 30 & 26 & \cellcolor{lightgreen} 92 & 0 & 30 & 24 & 67 & 28 & 30 & $\infty$ & $\infty$ \\\hline
+J & 65 & $\infty$ & 22 & 27 & \cellcolor{lightgreen} 33 & 31 & 27 & \cellcolor{lightgreen} 93 & \cellcolor{lightgreen} 36 & 0 & 25 & $\infty$ & 29 & 31 & $\infty$ & $\infty$ \\\hline
+K & 22 & 1 & 1 & 6 & \cellcolor{lightgreen} 12 & 10 & 6 & \cellcolor{lightgreen} 72 & \cellcolor{lightgreen} 15 & 10 & 0 & 12 & 8 & 10 & 6 & 9 \\\hline
+L & 2 & 4 & $\infty$ & $\infty$ & 1 & 31 & 1 & 22 & $\infty$ & 17 & 12 & 0 & $\infty$ & $\infty$ & 9 & 12 \\\hline
+M & 4 & 7 & $\infty$ & $\infty$ & $\infty$ & 34 & 4 & 5 & 9 & 19 & 15 & $\infty$ & 0 & $\infty$ & 12 & 15 \\\hline
+N & \cellcolor{lightgreen} 103 & 6 & $\infty$ & 62 & \cellcolor{lightgreen} 68 & 33 & 13 & \cellcolor{lightgreen} 128 & 15 & 21 & 3 & $\infty$ & \cellcolor{lightgreen} 68 & 0 & 11 & 14 \\\hline
+O & 5 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 9 & $\infty$ & 20 & 21 & $\infty$ & $\infty$ & 2 & 0 & $\infty$ \\\hline
+P & 4 & 6 & 9 & 0 & \cellcolor{lightgreen} 6 & 2 & 3 & 13 & \cellcolor{lightgreen} 9 & 18 & 11 & 15 & 3 & 0 & 9 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(4) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & - & - & - & - & - & - & - & - & - & A & A & - & - & - & - & - \\\hline
+B & - & - & - & - & - & B & - & - & - & B & B & - & - & - & B & B \\\hline
+C & \cellcolor{lightblue} D & - & - & C & \cellcolor{lightblue} D & C & C & \cellcolor{lightblue} D & \cellcolor{lightblue} D & C & C & - & C & C & - & - \\\hline
+D & D & - & - & - & D & D & D & D & D & D & D & - & D & D & - & - \\\hline
+E & E & E & - & - & - & E & E & - & - & E & E & E & - & - & B & B \\\hline
+F & - & - & - & - & - & - & F & - & - & - & F & F & F & F & - & - \\\hline
+G & G & - & G & C & \cellcolor{lightblue} D & C & - & \cellcolor{lightblue} D & \cellcolor{lightblue} D & A & G & - & C & G & - & - \\\hline
+H & H & H & - & - & - & B & - & - & - & A & A & H & - & H & B & B \\\hline
+I & \cellcolor{lightblue} D & - & I & C & \cellcolor{lightblue} D & C & C & \cellcolor{lightblue} D & - & C & C & I & C & C & - & - \\\hline
+J & J & - & J & J & \cellcolor{lightblue} D & C & C & \cellcolor{lightblue} D & \cellcolor{lightblue} D & - & C & - & C & C & - & - \\\hline
+K & K & K & K & C & \cellcolor{lightblue} D & C & C & \cellcolor{lightblue} D & \cellcolor{lightblue} D & C & - & K & C & C & B & B \\\hline
+L & L & L & - & - & L & B & L & L & - & A & B & - & - & - & B & B \\\hline
+M & M & M & - & - & - & B & M & M & M & A & B & - & - & - & B & B \\\hline
+N & \cellcolor{lightblue} D & N & - & N & \cellcolor{lightblue} D & B & N & \cellcolor{lightblue} D & N & N & N & - & \cellcolor{lightblue} D & - & B & B \\\hline
+O & O & - & - & - & - & - & - & O & - & A & A & - & - & O & - & - \\\hline
+P & P & P & P & P & \cellcolor{lightblue} D & P & P & P & \cellcolor{lightblue} D & C & P & P & P & P & P & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(4) - Cambios resaltados en azul}
+\end{table}
+
+\subsubsection{Iteración 5 (k = 5) - Nodo intermedio: E}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & 0 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 15 & 16 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\\hline
+B & $\infty$ & 0 & $\infty$ & $\infty$ & $\infty$ & 27 & $\infty$ & $\infty$ & $\infty$ & 22 & 8 & $\infty$ & $\infty$ & $\infty$ & 5 & 8 \\\hline
+C & \cellcolor{lightgreen} 11 & \cellcolor{lightgreen} 53 & 0 & 5 & 11 & 9 & 5 & 71 & 14 & 9 & 3 & \cellcolor{lightgreen} 23 & 7 & 9 & \cellcolor{lightgreen} 58 & \cellcolor{lightgreen} 61 \\\hline
+D & \cellcolor{lightgreen} 6 & \cellcolor{lightgreen} 48 & $\infty$ & 0 & 6 & 7 & 12 & 66 & 9 & \cellcolor{lightgreen} 15 & \cellcolor{lightgreen} 13 & \cellcolor{lightgreen} 18 & 6 & 6 & \cellcolor{lightgreen} 53 & \cellcolor{lightgreen} 56 \\\hline
+E & 0 & 42 & $\infty$ & $\infty$ & 0 & 11 & 21 & $\infty$ & $\infty$ & 9 & 7 & 12 & $\infty$ & $\infty$ & 47 & 50 \\\hline
+F & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 0 & 1 & $\infty$ & $\infty$ & $\infty$ & 9 & 1 & 23 & 56 & $\infty$ & $\infty$ \\\hline
+G & 1 & \cellcolor{lightgreen} 131 & 78 & 83 & 89 & 87 & 0 & 149 & 92 & 16 & 17 & \cellcolor{lightgreen} 101 & 85 & 2 & \cellcolor{lightgreen} 136 & \cellcolor{lightgreen} 139 \\\hline
+H & 2 & 65 & $\infty$ & $\infty$ & $\infty$ & 92 & $\infty$ & 0 & $\infty$ & 17 & 18 & 23 & $\infty$ & 3 & 70 & 73 \\\hline
+I & \cellcolor{lightgreen} 32 & \cellcolor{lightgreen} 74 & 21 & 26 & 32 & 30 & 26 & 92 & 0 & 30 & 24 & \cellcolor{lightgreen} 44 & 28 & 30 & \cellcolor{lightgreen} 79 & \cellcolor{lightgreen} 82 \\\hline
+J & \cellcolor{lightgreen} 33 & \cellcolor{lightgreen} 75 & 22 & 27 & 33 & 31 & 27 & 93 & 36 & 0 & 25 & \cellcolor{lightgreen} 45 & 29 & 31 & \cellcolor{lightgreen} 80 & \cellcolor{lightgreen} 83 \\\hline
+K & \cellcolor{lightgreen} 12 & 1 & 1 & 6 & 12 & 10 & 6 & 72 & 15 & 10 & 0 & 12 & 8 & 10 & 6 & 9 \\\hline
+L & \cellcolor{lightgreen} 1 & 4 & $\infty$ & $\infty$ & 1 & \cellcolor{lightgreen} 12 & 1 & 22 & $\infty$ & \cellcolor{lightgreen} 10 & \cellcolor{lightgreen} 8 & 0 & $\infty$ & $\infty$ & 9 & 12 \\\hline
+M & 4 & 7 & $\infty$ & $\infty$ & $\infty$ & 34 & 4 & 5 & 9 & 19 & 15 & $\infty$ & 0 & $\infty$ & 12 & 15 \\\hline
+N & \cellcolor{lightgreen} 68 & 6 & $\infty$ & 62 & 68 & 33 & 13 & 128 & 15 & 21 & 3 & \cellcolor{lightgreen} 80 & 68 & 0 & 11 & 14 \\\hline
+O & 5 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 9 & $\infty$ & 20 & 21 & $\infty$ & $\infty$ & 2 & 0 & $\infty$ \\\hline
+P & 4 & 6 & 9 & 0 & 6 & 2 & 3 & 13 & 9 & \cellcolor{lightgreen} 15 & 11 & 15 & 3 & 0 & 9 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(5) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & - & - & - & - & - & - & - & - & - & A & A & - & - & - & - & - \\\hline
+B & - & - & - & - & - & B & - & - & - & B & B & - & - & - & B & B \\\hline
+C & \cellcolor{lightblue} E & \cellcolor{lightblue} E & - & C & D & C & C & D & D & C & C & \cellcolor{lightblue} E & C & C & \cellcolor{lightblue} B & \cellcolor{lightblue} B \\\hline
+D & \cellcolor{lightblue} E & \cellcolor{lightblue} E & - & - & D & D & D & D & D & \cellcolor{lightblue} E & \cellcolor{lightblue} E & \cellcolor{lightblue} E & D & D & \cellcolor{lightblue} B & \cellcolor{lightblue} B \\\hline
+E & E & E & - & - & - & E & E & - & - & E & E & E & - & - & B & B \\\hline
+F & - & - & - & - & - & - & F & - & - & - & F & F & F & F & - & - \\\hline
+G & G & \cellcolor{lightblue} E & G & C & D & C & - & D & D & A & G & \cellcolor{lightblue} E & C & G & \cellcolor{lightblue} B & \cellcolor{lightblue} B \\\hline
+H & H & H & - & - & - & B & - & - & - & A & A & H & - & H & B & B \\\hline
+I & \cellcolor{lightblue} E & \cellcolor{lightblue} E & I & C & D & C & C & D & - & C & C & \cellcolor{lightblue} E & C & C & \cellcolor{lightblue} B & \cellcolor{lightblue} B \\\hline
+J & \cellcolor{lightblue} E & \cellcolor{lightblue} E & J & J & D & C & C & D & D & - & C & \cellcolor{lightblue} E & C & C & \cellcolor{lightblue} B & \cellcolor{lightblue} B \\\hline
+K & \cellcolor{lightblue} E & K & K & C & D & C & C & D & D & C & - & K & C & C & B & B \\\hline
+L & \cellcolor{lightblue} E & L & - & - & L & \cellcolor{lightblue} E & L & L & - & \cellcolor{lightblue} E & \cellcolor{lightblue} E & - & - & - & B & B \\\hline
+M & M & M & - & - & - & B & M & M & M & A & B & - & - & - & B & B \\\hline
+N & \cellcolor{lightblue} E & N & - & N & D & B & N & D & N & N & N & \cellcolor{lightblue} E & D & - & B & B \\\hline
+O & O & - & - & - & - & - & - & O & - & A & A & - & - & O & - & - \\\hline
+P & P & P & P & P & D & P & P & P & D & \cellcolor{lightblue} E & P & P & P & P & P & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(5) - Cambios resaltados en azul}
+\end{table}
+
+\subsubsection{Iteración 6 (k = 6) - Nodo intermedio: F}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & 0 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 15 & 16 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\\hline
+B & $\infty$ & 0 & $\infty$ & $\infty$ & $\infty$ & 27 & \cellcolor{lightgreen} 28 & $\infty$ & $\infty$ & 22 & 8 & \cellcolor{lightgreen} 28 & \cellcolor{lightgreen} 50 & \cellcolor{lightgreen} 83 & 5 & 8 \\\hline
+C & 11 & 53 & 0 & 5 & 11 & 9 & 5 & 71 & 14 & 9 & 3 & \cellcolor{lightgreen} 10 & 7 & 9 & 58 & 61 \\\hline
+D & 6 & 48 & $\infty$ & 0 & 6 & 7 & \cellcolor{lightgreen} 8 & 66 & 9 & 15 & 13 & \cellcolor{lightgreen} 8 & 6 & 6 & 53 & 56 \\\hline
+E & 0 & 42 & $\infty$ & $\infty$ & 0 & 11 & \cellcolor{lightgreen} 12 & $\infty$ & $\infty$ & 9 & 7 & 12 & \cellcolor{lightgreen} 34 & \cellcolor{lightgreen} 67 & 47 & 50 \\\hline
+F & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 0 & 1 & $\infty$ & $\infty$ & $\infty$ & 9 & 1 & 23 & 56 & $\infty$ & $\infty$ \\\hline
+G & 1 & 131 & 78 & 83 & 89 & 87 & 0 & 149 & 92 & 16 & 17 & \cellcolor{lightgreen} 88 & 85 & 2 & 136 & 139 \\\hline
+H & 2 & 65 & $\infty$ & $\infty$ & $\infty$ & 92 & \cellcolor{lightgreen} 93 & 0 & $\infty$ & 17 & 18 & 23 & \cellcolor{lightgreen} 115 & 3 & 70 & 73 \\\hline
+I & 32 & 74 & 21 & 26 & 32 & 30 & 26 & 92 & 0 & 30 & 24 & \cellcolor{lightgreen} 31 & 28 & 30 & 79 & 82 \\\hline
+J & 33 & 75 & 22 & 27 & 33 & 31 & 27 & 93 & 36 & 0 & 25 & \cellcolor{lightgreen} 32 & 29 & 31 & 80 & 83 \\\hline
+K & 12 & 1 & 1 & 6 & 12 & 10 & 6 & 72 & 15 & 10 & 0 & \cellcolor{lightgreen} 11 & 8 & 10 & 6 & 9 \\\hline
+L & 1 & 4 & $\infty$ & $\infty$ & 1 & 12 & 1 & 22 & $\infty$ & 10 & 8 & 0 & \cellcolor{lightgreen} 35 & \cellcolor{lightgreen} 68 & 9 & 12 \\\hline
+M & 4 & 7 & $\infty$ & $\infty$ & $\infty$ & 34 & 4 & 5 & 9 & 19 & 15 & \cellcolor{lightgreen} 35 & 0 & \cellcolor{lightgreen} 90 & 12 & 15 \\\hline
+N & 68 & 6 & $\infty$ & 62 & 68 & 33 & 13 & 128 & 15 & 21 & 3 & \cellcolor{lightgreen} 34 & \cellcolor{lightgreen} 56 & 0 & 11 & 14 \\\hline
+O & 5 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 9 & $\infty$ & 20 & 21 & $\infty$ & $\infty$ & 2 & 0 & $\infty$ \\\hline
+P & 4 & 6 & 9 & 0 & 6 & 2 & 3 & 13 & 9 & 15 & 11 & \cellcolor{lightgreen} 3 & 3 & 0 & 9 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(6) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & - & - & - & - & - & - & - & - & - & A & A & - & - & - & - & - \\\hline
+B & - & - & - & - & - & B & \cellcolor{lightblue} F & - & - & B & B & \cellcolor{lightblue} F & \cellcolor{lightblue} F & \cellcolor{lightblue} F & B & B \\\hline
+C & E & E & - & C & D & C & C & D & D & C & C & \cellcolor{lightblue} F & C & C & B & B \\\hline
+D & E & E & - & - & D & D & \cellcolor{lightblue} F & D & D & E & E & \cellcolor{lightblue} F & D & D & B & B \\\hline
+E & E & E & - & - & - & E & \cellcolor{lightblue} F & - & - & E & E & E & \cellcolor{lightblue} F & \cellcolor{lightblue} F & B & B \\\hline
+F & - & - & - & - & - & - & F & - & - & - & F & F & F & F & - & - \\\hline
+G & G & E & G & C & D & C & - & D & D & A & G & \cellcolor{lightblue} F & C & G & B & B \\\hline
+H & H & H & - & - & - & B & \cellcolor{lightblue} F & - & - & A & A & H & \cellcolor{lightblue} F & H & B & B \\\hline
+I & E & E & I & C & D & C & C & D & - & C & C & \cellcolor{lightblue} F & C & C & B & B \\\hline
+J & E & E & J & J & D & C & C & D & D & - & C & \cellcolor{lightblue} F & C & C & B & B \\\hline
+K & E & K & K & C & D & C & C & D & D & C & - & \cellcolor{lightblue} F & C & C & B & B \\\hline
+L & E & L & - & - & L & E & L & L & - & E & E & - & \cellcolor{lightblue} F & \cellcolor{lightblue} F & B & B \\\hline
+M & M & M & - & - & - & B & M & M & M & A & B & \cellcolor{lightblue} F & - & \cellcolor{lightblue} F & B & B \\\hline
+N & E & N & - & N & D & B & N & D & N & N & N & \cellcolor{lightblue} F & \cellcolor{lightblue} F & - & B & B \\\hline
+O & O & - & - & - & - & - & - & O & - & A & A & - & - & O & - & - \\\hline
+P & P & P & P & P & D & P & P & P & D & E & P & \cellcolor{lightblue} F & P & P & P & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(6) - Cambios resaltados en azul}
+\end{table}
+
+\subsubsection{Iteración 7 (k = 7) - Nodo intermedio: G}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & 0 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 15 & 16 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\\hline
+B & \cellcolor{lightgreen} 29 & 0 & \cellcolor{lightgreen} 106 & \cellcolor{lightgreen} 111 & \cellcolor{lightgreen} 117 & 27 & 28 & \cellcolor{lightgreen} 177 & \cellcolor{lightgreen} 120 & 22 & 8 & 28 & 50 & \cellcolor{lightgreen} 30 & 5 & 8 \\\hline
+C & \cellcolor{lightgreen} 6 & 53 & 0 & 5 & 11 & 9 & 5 & 71 & 14 & 9 & 3 & 10 & 7 & \cellcolor{lightgreen} 7 & 58 & 61 \\\hline
+D & 6 & 48 & \cellcolor{lightgreen} 86 & 0 & 6 & 7 & 8 & 66 & 9 & 15 & 13 & 8 & 6 & 6 & 53 & 56 \\\hline
+E & 0 & 42 & \cellcolor{lightgreen} 90 & \cellcolor{lightgreen} 95 & 0 & 11 & 12 & \cellcolor{lightgreen} 161 & \cellcolor{lightgreen} 104 & 9 & 7 & 12 & 34 & \cellcolor{lightgreen} 14 & 47 & 50 \\\hline
+F & \cellcolor{lightgreen} 2 & \cellcolor{lightgreen} 132 & \cellcolor{lightgreen} 79 & \cellcolor{lightgreen} 84 & \cellcolor{lightgreen} 90 & 0 & 1 & \cellcolor{lightgreen} 150 & \cellcolor{lightgreen} 93 & \cellcolor{lightgreen} 17 & 9 & 1 & 23 & \cellcolor{lightgreen} 3 & \cellcolor{lightgreen} 137 & \cellcolor{lightgreen} 140 \\\hline
+G & 1 & 131 & 78 & 83 & 89 & 87 & 0 & 149 & 92 & 16 & 17 & 88 & 85 & 2 & 136 & 139 \\\hline
+H & 2 & 65 & \cellcolor{lightgreen} 171 & \cellcolor{lightgreen} 176 & \cellcolor{lightgreen} 182 & 92 & 93 & 0 & \cellcolor{lightgreen} 185 & 17 & 18 & 23 & 115 & 3 & 70 & 73 \\\hline
+I & \cellcolor{lightgreen} 27 & 74 & 21 & 26 & 32 & 30 & 26 & 92 & 0 & 30 & 24 & 31 & 28 & \cellcolor{lightgreen} 28 & 79 & 82 \\\hline
+J & \cellcolor{lightgreen} 28 & 75 & 22 & 27 & 33 & 31 & 27 & 93 & 36 & 0 & 25 & 32 & 29 & \cellcolor{lightgreen} 29 & 80 & 83 \\\hline
+K & \cellcolor{lightgreen} 7 & 1 & 1 & 6 & 12 & 10 & 6 & 72 & 15 & 10 & 0 & 11 & 8 & \cellcolor{lightgreen} 8 & 6 & 9 \\\hline
+L & 1 & 4 & \cellcolor{lightgreen} 79 & \cellcolor{lightgreen} 84 & 1 & 12 & 1 & 22 & \cellcolor{lightgreen} 93 & 10 & 8 & 0 & 35 & \cellcolor{lightgreen} 3 & 9 & 12 \\\hline
+M & 4 & 7 & \cellcolor{lightgreen} 82 & \cellcolor{lightgreen} 87 & \cellcolor{lightgreen} 93 & 34 & 4 & 5 & 9 & 19 & 15 & 35 & 0 & \cellcolor{lightgreen} 6 & 12 & 15 \\\hline
+N & \cellcolor{lightgreen} 14 & 6 & \cellcolor{lightgreen} 91 & 62 & 68 & 33 & 13 & 128 & 15 & 21 & 3 & 34 & 56 & 0 & 11 & 14 \\\hline
+O & 5 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 9 & $\infty$ & 20 & 21 & $\infty$ & $\infty$ & 2 & 0 & $\infty$ \\\hline
+P & 4 & 6 & 9 & 0 & 6 & 2 & 3 & 13 & 9 & 15 & 11 & 3 & 3 & 0 & 9 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(7) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & - & - & - & - & - & - & - & - & - & A & A & - & - & - & - & - \\\hline
+B & \cellcolor{lightblue} G & - & \cellcolor{lightblue} G & \cellcolor{lightblue} C & \cellcolor{lightblue} D & B & F & \cellcolor{lightblue} D & \cellcolor{lightblue} D & B & B & F & F & \cellcolor{lightblue} G & B & B \\\hline
+C & \cellcolor{lightblue} G & E & - & C & D & C & C & D & D & C & C & F & C & \cellcolor{lightblue} G & B & B \\\hline
+D & E & E & \cellcolor{lightblue} G & - & D & D & F & D & D & E & E & F & D & D & B & B \\\hline
+E & E & E & \cellcolor{lightblue} G & \cellcolor{lightblue} C & - & E & F & \cellcolor{lightblue} D & \cellcolor{lightblue} D & E & E & E & F & \cellcolor{lightblue} G & B & B \\\hline
+F & \cellcolor{lightblue} G & \cellcolor{lightblue} E & \cellcolor{lightblue} G & \cellcolor{lightblue} C & \cellcolor{lightblue} D & - & F & \cellcolor{lightblue} D & \cellcolor{lightblue} D & \cellcolor{lightblue} A & F & F & F & \cellcolor{lightblue} G & \cellcolor{lightblue} B & \cellcolor{lightblue} B \\\hline
+G & G & E & G & C & D & C & - & D & D & A & G & F & C & G & B & B \\\hline
+H & H & H & \cellcolor{lightblue} G & \cellcolor{lightblue} C & \cellcolor{lightblue} D & B & F & - & \cellcolor{lightblue} D & A & A & H & F & H & B & B \\\hline
+I & \cellcolor{lightblue} G & E & I & C & D & C & C & D & - & C & C & F & C & \cellcolor{lightblue} G & B & B \\\hline
+J & \cellcolor{lightblue} G & E & J & J & D & C & C & D & D & - & C & F & C & \cellcolor{lightblue} G & B & B \\\hline
+K & \cellcolor{lightblue} G & K & K & C & D & C & C & D & D & C & - & F & C & \cellcolor{lightblue} G & B & B \\\hline
+L & E & L & \cellcolor{lightblue} G & \cellcolor{lightblue} C & L & E & L & L & \cellcolor{lightblue} D & E & E & - & F & \cellcolor{lightblue} G & B & B \\\hline
+M & M & M & \cellcolor{lightblue} G & \cellcolor{lightblue} C & \cellcolor{lightblue} D & B & M & M & M & A & B & F & - & \cellcolor{lightblue} G & B & B \\\hline
+N & \cellcolor{lightblue} G & N & \cellcolor{lightblue} G & N & D & B & N & D & N & N & N & F & F & - & B & B \\\hline
+O & O & - & - & - & - & - & - & O & - & A & A & - & - & O & - & - \\\hline
+P & P & P & P & P & D & P & P & P & D & E & P & F & P & P & P & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(7) - Cambios resaltados en azul}
+\end{table}
+
+\subsubsection{Iteración 8 (k = 8) - Nodo intermedio: H}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & 0 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 15 & 16 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\\hline
+B & 29 & 0 & 106 & 111 & 117 & 27 & 28 & 177 & 120 & 22 & 8 & 28 & 50 & 30 & 5 & 8 \\\hline
+C & 6 & 53 & 0 & 5 & 11 & 9 & 5 & 71 & 14 & 9 & 3 & 10 & 7 & 7 & 58 & 61 \\\hline
+D & 6 & 48 & 86 & 0 & 6 & 7 & 8 & 66 & 9 & 15 & 13 & 8 & 6 & 6 & 53 & 56 \\\hline
+E & 0 & 42 & 90 & 95 & 0 & 11 & 12 & 161 & 104 & 9 & 7 & 12 & 34 & 14 & 47 & 50 \\\hline
+F & 2 & 132 & 79 & 84 & 90 & 0 & 1 & 150 & 93 & 17 & 9 & 1 & 23 & 3 & 137 & 140 \\\hline
+G & 1 & 131 & 78 & 83 & 89 & 87 & 0 & 149 & 92 & 16 & 17 & 88 & 85 & 2 & 136 & 139 \\\hline
+H & 2 & 65 & 171 & 176 & 182 & 92 & 93 & 0 & 185 & 17 & 18 & 23 & 115 & 3 & 70 & 73 \\\hline
+I & 27 & 74 & 21 & 26 & 32 & 30 & 26 & 92 & 0 & 30 & 24 & 31 & 28 & 28 & 79 & 82 \\\hline
+J & 28 & 75 & 22 & 27 & 33 & 31 & 27 & 93 & 36 & 0 & 25 & 32 & 29 & 29 & 80 & 83 \\\hline
+K & 7 & 1 & 1 & 6 & 12 & 10 & 6 & 72 & 15 & 10 & 0 & 11 & 8 & 8 & 6 & 9 \\\hline
+L & 1 & 4 & 79 & 84 & 1 & 12 & 1 & 22 & 93 & 10 & 8 & 0 & 35 & 3 & 9 & 12 \\\hline
+M & 4 & 7 & 82 & 87 & 93 & 34 & 4 & 5 & 9 & 19 & 15 & \cellcolor{lightgreen} 28 & 0 & 6 & 12 & 15 \\\hline
+N & 14 & 6 & 91 & 62 & 68 & 33 & 13 & 128 & 15 & 21 & 3 & 34 & 56 & 0 & 11 & 14 \\\hline
+O & 5 & \cellcolor{lightgreen} 74 & \cellcolor{lightgreen} 180 & \cellcolor{lightgreen} 185 & \cellcolor{lightgreen} 191 & \cellcolor{lightgreen} 101 & \cellcolor{lightgreen} 102 & 9 & \cellcolor{lightgreen} 194 & 20 & 21 & \cellcolor{lightgreen} 32 & \cellcolor{lightgreen} 124 & 2 & 0 & \cellcolor{lightgreen} 82 \\\hline
+P & 4 & 6 & 9 & 0 & 6 & 2 & 3 & 13 & 9 & 15 & 11 & 3 & 3 & 0 & 9 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(8) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & - & - & - & - & - & - & - & - & - & A & A & - & - & - & - & - \\\hline
+B & G & - & G & C & D & B & F & D & D & B & B & F & F & G & B & B \\\hline
+C & G & E & - & C & D & C & C & D & D & C & C & F & C & G & B & B \\\hline
+D & E & E & G & - & D & D & F & D & D & E & E & F & D & D & B & B \\\hline
+E & E & E & G & C & - & E & F & D & D & E & E & E & F & G & B & B \\\hline
+F & G & E & G & C & D & - & F & D & D & A & F & F & F & G & B & B \\\hline
+G & G & E & G & C & D & C & - & D & D & A & G & F & C & G & B & B \\\hline
+H & H & H & G & C & D & B & F & - & D & A & A & H & F & H & B & B \\\hline
+I & G & E & I & C & D & C & C & D & - & C & C & F & C & G & B & B \\\hline
+J & G & E & J & J & D & C & C & D & D & - & C & F & C & G & B & B \\\hline
+K & G & K & K & C & D & C & C & D & D & C & - & F & C & G & B & B \\\hline
+L & E & L & G & C & L & E & L & L & D & E & E & - & F & G & B & B \\\hline
+M & M & M & G & C & D & B & M & M & M & A & B & \cellcolor{lightblue} H & - & G & B & B \\\hline
+N & G & N & G & N & D & B & N & D & N & N & N & F & F & - & B & B \\\hline
+O & O & \cellcolor{lightblue} H & \cellcolor{lightblue} G & \cellcolor{lightblue} C & \cellcolor{lightblue} D & \cellcolor{lightblue} B & \cellcolor{lightblue} F & O & \cellcolor{lightblue} D & A & A & \cellcolor{lightblue} H & \cellcolor{lightblue} F & O & - & \cellcolor{lightblue} B \\\hline
+P & P & P & P & P & D & P & P & P & D & E & P & F & P & P & P & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(8) - Cambios resaltados en azul}
+\end{table}
+
+\subsubsection{Iteración 9 (k = 9) - Nodo intermedio: I}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & 0 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 15 & 16 & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\\hline
+B & 29 & 0 & 106 & 111 & 117 & 27 & 28 & 177 & 120 & 22 & 8 & 28 & 50 & 30 & 5 & 8 \\\hline
+C & 6 & 53 & 0 & 5 & 11 & 9 & 5 & 71 & 14 & 9 & 3 & 10 & 7 & 7 & 58 & 61 \\\hline
+D & 6 & 48 & \cellcolor{lightgreen} 30 & 0 & 6 & 7 & 8 & 66 & 9 & 15 & 13 & 8 & 6 & 6 & 53 & 56 \\\hline
+E & 0 & 42 & 90 & 95 & 0 & 11 & 12 & 161 & 104 & 9 & 7 & 12 & 34 & 14 & 47 & 50 \\\hline
+F & 2 & 132 & 79 & 84 & 90 & 0 & 1 & 150 & 93 & 17 & 9 & 1 & 23 & 3 & 137 & 140 \\\hline
+G & 1 & 131 & 78 & 83 & 89 & 87 & 0 & 149 & 92 & 16 & 17 & 88 & 85 & 2 & 136 & 139 \\\hline
+H & 2 & 65 & 171 & 176 & 182 & 92 & 93 & 0 & 185 & 17 & 18 & 23 & 115 & 3 & 70 & 73 \\\hline
+I & 27 & 74 & 21 & 26 & 32 & 30 & 26 & 92 & 0 & 30 & 24 & 31 & 28 & 28 & 79 & 82 \\\hline
+J & 28 & 75 & 22 & 27 & 33 & 31 & 27 & 93 & 36 & 0 & 25 & 32 & 29 & 29 & 80 & 83 \\\hline
+K & 7 & 1 & 1 & 6 & 12 & 10 & 6 & 72 & 15 & 10 & 0 & 11 & 8 & 8 & 6 & 9 \\\hline
+L & 1 & 4 & 79 & 84 & 1 & 12 & 1 & 22 & 93 & 10 & 8 & 0 & 35 & 3 & 9 & 12 \\\hline
+M & 4 & 7 & \cellcolor{lightgreen} 30 & \cellcolor{lightgreen} 35 & \cellcolor{lightgreen} 41 & 34 & 4 & 5 & 9 & 19 & 15 & 28 & 0 & 6 & 12 & 15 \\\hline
+N & 14 & 6 & \cellcolor{lightgreen} 36 & \cellcolor{lightgreen} 41 & \cellcolor{lightgreen} 47 & 33 & 13 & \cellcolor{lightgreen} 107 & 15 & 21 & 3 & 34 & \cellcolor{lightgreen} 43 & 0 & 11 & 14 \\\hline
+O & 5 & 74 & 180 & 185 & 191 & 101 & 102 & 9 & 194 & 20 & 21 & 32 & 124 & 2 & 0 & 82 \\\hline
+P & 4 & 6 & 9 & 0 & 6 & 2 & 3 & 13 & 9 & 15 & 11 & 3 & 3 & 0 & 9 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(9) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & - & - & - & - & - & - & - & - & - & A & A & - & - & - & - & - \\\hline
+B & G & - & G & C & D & B & F & D & D & B & B & F & F & G & B & B \\\hline
+C & G & E & - & C & D & C & C & D & D & C & C & F & C & G & B & B \\\hline
+D & E & E & \cellcolor{lightblue} I & - & D & D & F & D & D & E & E & F & D & D & B & B \\\hline
+E & E & E & G & C & - & E & F & D & D & E & E & E & F & G & B & B \\\hline
+F & G & E & G & C & D & - & F & D & D & A & F & F & F & G & B & B \\\hline
+G & G & E & G & C & D & C & - & D & D & A & G & F & C & G & B & B \\\hline
+H & H & H & G & C & D & B & F & - & D & A & A & H & F & H & B & B \\\hline
+I & G & E & I & C & D & C & C & D & - & C & C & F & C & G & B & B \\\hline
+J & G & E & J & J & D & C & C & D & D & - & C & F & C & G & B & B \\\hline
+K & G & K & K & C & D & C & C & D & D & C & - & F & C & G & B & B \\\hline
+L & E & L & G & C & L & E & L & L & D & E & E & - & F & G & B & B \\\hline
+M & M & M & \cellcolor{lightblue} I & C & D & B & M & M & M & A & B & H & - & G & B & B \\\hline
+N & G & N & \cellcolor{lightblue} I & \cellcolor{lightblue} C & D & B & N & D & N & N & N & F & \cellcolor{lightblue} C & - & B & B \\\hline
+O & O & H & G & C & D & B & F & O & D & A & A & H & F & O & - & B \\\hline
+P & P & P & P & P & D & P & P & P & D & E & P & F & P & P & P & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(9) - Cambios resaltados en azul}
+\end{table}
+
+\subsubsection{Iteración 10 (k = 10) - Nodo intermedio: J}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & 0 & \cellcolor{lightgreen} 90 & \cellcolor{lightgreen} 37 & \cellcolor{lightgreen} 42 & \cellcolor{lightgreen} 48 & \cellcolor{lightgreen} 46 & \cellcolor{lightgreen} 42 & \cellcolor{lightgreen} 108 & \cellcolor{lightgreen} 51 & 15 & 16 & \cellcolor{lightgreen} 47 & \cellcolor{lightgreen} 44 & \cellcolor{lightgreen} 44 & \cellcolor{lightgreen} 95 & \cellcolor{lightgreen} 98 \\\hline
+B & 29 & 0 & \cellcolor{lightgreen} 44 & \cellcolor{lightgreen} 49 & \cellcolor{lightgreen} 55 & 27 & 28 & \cellcolor{lightgreen} 115 & \cellcolor{lightgreen} 58 & 22 & 8 & 28 & 50 & 30 & 5 & 8 \\\hline
+C & 6 & 53 & 0 & 5 & 11 & 9 & 5 & 71 & 14 & 9 & 3 & 10 & 7 & 7 & 58 & 61 \\\hline
+D & 6 & 48 & 30 & 0 & 6 & 7 & 8 & 66 & 9 & 15 & 13 & 8 & 6 & 6 & 53 & 56 \\\hline
+E & 0 & 42 & \cellcolor{lightgreen} 31 & \cellcolor{lightgreen} 36 & 0 & 11 & 12 & \cellcolor{lightgreen} 102 & \cellcolor{lightgreen} 45 & 9 & 7 & 12 & 34 & 14 & 47 & 50 \\\hline
+F & 2 & \cellcolor{lightgreen} 92 & \cellcolor{lightgreen} 39 & \cellcolor{lightgreen} 44 & \cellcolor{lightgreen} 50 & 0 & 1 & \cellcolor{lightgreen} 110 & \cellcolor{lightgreen} 53 & 17 & 9 & 1 & 23 & 3 & \cellcolor{lightgreen} 97 & \cellcolor{lightgreen} 100 \\\hline
+G & 1 & \cellcolor{lightgreen} 91 & \cellcolor{lightgreen} 38 & \cellcolor{lightgreen} 43 & \cellcolor{lightgreen} 49 & \cellcolor{lightgreen} 47 & 0 & \cellcolor{lightgreen} 109 & \cellcolor{lightgreen} 52 & 16 & 17 & \cellcolor{lightgreen} 48 & \cellcolor{lightgreen} 45 & 2 & \cellcolor{lightgreen} 96 & \cellcolor{lightgreen} 99 \\\hline
+H & 2 & 65 & \cellcolor{lightgreen} 39 & \cellcolor{lightgreen} 44 & \cellcolor{lightgreen} 50 & \cellcolor{lightgreen} 48 & \cellcolor{lightgreen} 44 & 0 & \cellcolor{lightgreen} 53 & 17 & 18 & 23 & \cellcolor{lightgreen} 46 & 3 & 70 & 73 \\\hline
+I & 27 & 74 & 21 & 26 & 32 & 30 & 26 & 92 & 0 & 30 & 24 & 31 & 28 & 28 & 79 & 82 \\\hline
+J & 28 & 75 & 22 & 27 & 33 & 31 & 27 & 93 & 36 & 0 & 25 & 32 & 29 & 29 & 80 & 83 \\\hline
+K & 7 & 1 & 1 & 6 & 12 & 10 & 6 & 72 & 15 & 10 & 0 & 11 & 8 & 8 & 6 & 9 \\\hline
+L & 1 & 4 & \cellcolor{lightgreen} 32 & \cellcolor{lightgreen} 37 & 1 & 12 & 1 & 22 & \cellcolor{lightgreen} 46 & 10 & 8 & 0 & 35 & 3 & 9 & 12 \\\hline
+M & 4 & 7 & 30 & 35 & 41 & 34 & 4 & 5 & 9 & 19 & 15 & 28 & 0 & 6 & 12 & 15 \\\hline
+N & 14 & 6 & 36 & 41 & 47 & 33 & 13 & 107 & 15 & 21 & 3 & 34 & 43 & 0 & 11 & 14 \\\hline
+O & 5 & 74 & \cellcolor{lightgreen} 42 & \cellcolor{lightgreen} 47 & \cellcolor{lightgreen} 53 & \cellcolor{lightgreen} 51 & \cellcolor{lightgreen} 47 & 9 & \cellcolor{lightgreen} 56 & 20 & 21 & 32 & \cellcolor{lightgreen} 49 & 2 & 0 & 82 \\\hline
+P & 4 & 6 & 9 & 0 & 6 & 2 & 3 & 13 & 9 & 15 & 11 & 3 & 3 & 0 & 9 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(10) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & - & \cellcolor{lightblue} E & \cellcolor{lightblue} J & \cellcolor{lightblue} J & \cellcolor{lightblue} D & \cellcolor{lightblue} C & \cellcolor{lightblue} C & \cellcolor{lightblue} D & \cellcolor{lightblue} D & A & A & \cellcolor{lightblue} F & \cellcolor{lightblue} C & \cellcolor{lightblue} G & \cellcolor{lightblue} B & \cellcolor{lightblue} B \\\hline
+B & G & - & \cellcolor{lightblue} J & \cellcolor{lightblue} J & D & B & F & D & D & B & B & F & F & G & B & B \\\hline
+C & G & E & - & C & D & C & C & D & D & C & C & F & C & G & B & B \\\hline
+D & E & E & I & - & D & D & F & D & D & E & E & F & D & D & B & B \\\hline
+E & E & E & \cellcolor{lightblue} J & \cellcolor{lightblue} J & - & E & F & D & D & E & E & E & F & G & B & B \\\hline
+F & G & E & \cellcolor{lightblue} J & \cellcolor{lightblue} J & D & - & F & D & D & A & F & F & F & G & B & B \\\hline
+G & G & E & \cellcolor{lightblue} J & \cellcolor{lightblue} J & D & C & - & D & D & A & G & F & C & G & B & B \\\hline
+H & H & H & \cellcolor{lightblue} J & \cellcolor{lightblue} J & D & \cellcolor{lightblue} C & \cellcolor{lightblue} C & - & D & A & A & H & \cellcolor{lightblue} C & H & B & B \\\hline
+I & G & E & I & C & D & C & C & D & - & C & C & F & C & G & B & B \\\hline
+J & G & E & J & J & D & C & C & D & D & - & C & F & C & G & B & B \\\hline
+K & G & K & K & C & D & C & C & D & D & C & - & F & C & G & B & B \\\hline
+L & E & L & \cellcolor{lightblue} J & \cellcolor{lightblue} J & L & E & L & L & D & E & E & - & F & G & B & B \\\hline
+M & M & M & I & C & D & B & M & M & M & A & B & H & - & G & B & B \\\hline
+N & G & N & I & C & D & B & N & D & N & N & N & F & C & - & B & B \\\hline
+O & O & H & \cellcolor{lightblue} J & \cellcolor{lightblue} J & D & \cellcolor{lightblue} C & \cellcolor{lightblue} C & O & D & A & A & H & \cellcolor{lightblue} C & O & - & B \\\hline
+P & P & P & P & P & D & P & P & P & D & E & P & F & P & P & P & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(10) - Cambios resaltados en azul}
+\end{table}
+
+\subsubsection{Iteración 11 (k = 11) - Nodo intermedio: K}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & 0 & \cellcolor{lightgreen} 17 & \cellcolor{lightgreen} 17 & \cellcolor{lightgreen} 22 & \cellcolor{lightgreen} 28 & \cellcolor{lightgreen} 26 & \cellcolor{lightgreen} 22 & \cellcolor{lightgreen} 88 & \cellcolor{lightgreen} 31 & 15 & 16 & \cellcolor{lightgreen} 27 & \cellcolor{lightgreen} 24 & \cellcolor{lightgreen} 24 & \cellcolor{lightgreen} 22 & \cellcolor{lightgreen} 25 \\\hline
+B & \cellcolor{lightgreen} 15 & 0 & \cellcolor{lightgreen} 9 & \cellcolor{lightgreen} 14 & \cellcolor{lightgreen} 20 & \cellcolor{lightgreen} 18 & \cellcolor{lightgreen} 14 & \cellcolor{lightgreen} 80 & \cellcolor{lightgreen} 23 & \cellcolor{lightgreen} 18 & 8 & \cellcolor{lightgreen} 19 & \cellcolor{lightgreen} 16 & \cellcolor{lightgreen} 16 & 5 & 8 \\\hline
+C & 6 & \cellcolor{lightgreen} 4 & 0 & 5 & 11 & 9 & 5 & 71 & 14 & 9 & 3 & 10 & 7 & 7 & \cellcolor{lightgreen} 9 & \cellcolor{lightgreen} 12 \\\hline
+D & 6 & \cellcolor{lightgreen} 14 & \cellcolor{lightgreen} 14 & 0 & 6 & 7 & 8 & 66 & 9 & 15 & 13 & 8 & 6 & 6 & \cellcolor{lightgreen} 19 & \cellcolor{lightgreen} 22 \\\hline
+E & 0 & \cellcolor{lightgreen} 8 & \cellcolor{lightgreen} 8 & \cellcolor{lightgreen} 13 & 0 & 11 & 12 & \cellcolor{lightgreen} 79 & \cellcolor{lightgreen} 22 & 9 & 7 & 12 & \cellcolor{lightgreen} 15 & 14 & \cellcolor{lightgreen} 13 & \cellcolor{lightgreen} 16 \\\hline
+F & 2 & \cellcolor{lightgreen} 10 & \cellcolor{lightgreen} 10 & \cellcolor{lightgreen} 15 & \cellcolor{lightgreen} 21 & 0 & 1 & \cellcolor{lightgreen} 81 & \cellcolor{lightgreen} 24 & 17 & 9 & 1 & \cellcolor{lightgreen} 17 & 3 & \cellcolor{lightgreen} 15 & \cellcolor{lightgreen} 18 \\\hline
+G & 1 & \cellcolor{lightgreen} 18 & \cellcolor{lightgreen} 18 & \cellcolor{lightgreen} 23 & \cellcolor{lightgreen} 29 & \cellcolor{lightgreen} 27 & 0 & \cellcolor{lightgreen} 89 & \cellcolor{lightgreen} 32 & 16 & 17 & \cellcolor{lightgreen} 28 & \cellcolor{lightgreen} 25 & 2 & \cellcolor{lightgreen} 23 & \cellcolor{lightgreen} 26 \\\hline
+H & 2 & \cellcolor{lightgreen} 19 & \cellcolor{lightgreen} 19 & \cellcolor{lightgreen} 24 & \cellcolor{lightgreen} 30 & \cellcolor{lightgreen} 28 & \cellcolor{lightgreen} 24 & 0 & \cellcolor{lightgreen} 33 & 17 & 18 & 23 & \cellcolor{lightgreen} 26 & 3 & \cellcolor{lightgreen} 24 & \cellcolor{lightgreen} 27 \\\hline
+I & 27 & \cellcolor{lightgreen} 25 & 21 & 26 & 32 & 30 & 26 & 92 & 0 & 30 & 24 & 31 & 28 & 28 & \cellcolor{lightgreen} 30 & \cellcolor{lightgreen} 33 \\\hline
+J & 28 & \cellcolor{lightgreen} 26 & 22 & 27 & 33 & 31 & 27 & 93 & 36 & 0 & 25 & 32 & 29 & 29 & \cellcolor{lightgreen} 31 & \cellcolor{lightgreen} 34 \\\hline
+K & 7 & 1 & 1 & 6 & 12 & 10 & 6 & 72 & 15 & 10 & 0 & 11 & 8 & 8 & 6 & 9 \\\hline
+L & 1 & 4 & \cellcolor{lightgreen} 9 & \cellcolor{lightgreen} 14 & 1 & 12 & 1 & 22 & \cellcolor{lightgreen} 23 & 10 & 8 & 0 & \cellcolor{lightgreen} 16 & 3 & 9 & 12 \\\hline
+M & 4 & 7 & \cellcolor{lightgreen} 16 & \cellcolor{lightgreen} 21 & \cellcolor{lightgreen} 27 & \cellcolor{lightgreen} 25 & 4 & 5 & 9 & 19 & 15 & \cellcolor{lightgreen} 26 & 0 & 6 & 12 & 15 \\\hline
+N & \cellcolor{lightgreen} 10 & \cellcolor{lightgreen} 4 & \cellcolor{lightgreen} 4 & \cellcolor{lightgreen} 9 & \cellcolor{lightgreen} 15 & \cellcolor{lightgreen} 13 & \cellcolor{lightgreen} 9 & \cellcolor{lightgreen} 75 & 15 & \cellcolor{lightgreen} 13 & 3 & \cellcolor{lightgreen} 14 & \cellcolor{lightgreen} 11 & 0 & \cellcolor{lightgreen} 9 & \cellcolor{lightgreen} 12 \\\hline
+O & 5 & \cellcolor{lightgreen} 22 & \cellcolor{lightgreen} 22 & \cellcolor{lightgreen} 27 & \cellcolor{lightgreen} 33 & \cellcolor{lightgreen} 31 & \cellcolor{lightgreen} 27 & 9 & \cellcolor{lightgreen} 36 & 20 & 21 & 32 & \cellcolor{lightgreen} 29 & 2 & 0 & \cellcolor{lightgreen} 30 \\\hline
+P & 4 & 6 & 9 & 0 & 6 & 2 & 3 & 13 & 9 & 15 & 11 & 3 & 3 & 0 & 9 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(11) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & - & \cellcolor{lightblue} K & \cellcolor{lightblue} K & \cellcolor{lightblue} C & D & C & C & D & D & A & A & F & C & G & B & B \\\hline
+B & G & - & \cellcolor{lightblue} K & \cellcolor{lightblue} C & D & \cellcolor{lightblue} C & \cellcolor{lightblue} C & D & D & \cellcolor{lightblue} C & B & F & \cellcolor{lightblue} C & G & B & B \\\hline
+C & G & \cellcolor{lightblue} K & - & C & D & C & C & D & D & C & C & F & C & G & B & B \\\hline
+D & E & \cellcolor{lightblue} K & \cellcolor{lightblue} K & - & D & D & F & D & D & E & E & F & D & D & B & B \\\hline
+E & E & \cellcolor{lightblue} K & \cellcolor{lightblue} K & \cellcolor{lightblue} C & - & E & F & D & D & E & E & E & \cellcolor{lightblue} C & G & B & B \\\hline
+F & G & \cellcolor{lightblue} K & \cellcolor{lightblue} K & \cellcolor{lightblue} C & D & - & F & D & D & A & F & F & \cellcolor{lightblue} C & G & B & B \\\hline
+G & G & \cellcolor{lightblue} K & \cellcolor{lightblue} K & \cellcolor{lightblue} C & D & C & - & D & D & A & G & F & C & G & B & B \\\hline
+H & H & \cellcolor{lightblue} K & \cellcolor{lightblue} K & \cellcolor{lightblue} C & D & C & C & - & D & A & A & H & C & H & B & B \\\hline
+I & G & \cellcolor{lightblue} K & I & C & D & C & C & D & - & C & C & F & C & G & B & B \\\hline
+J & G & \cellcolor{lightblue} K & J & J & D & C & C & D & D & - & C & F & C & G & B & B \\\hline
+K & G & K & K & C & D & C & C & D & D & C & - & F & C & G & B & B \\\hline
+L & E & L & \cellcolor{lightblue} K & \cellcolor{lightblue} C & L & E & L & L & D & E & E & - & \cellcolor{lightblue} C & G & B & B \\\hline
+M & M & M & \cellcolor{lightblue} K & C & D & \cellcolor{lightblue} C & M & M & M & A & B & \cellcolor{lightblue} F & - & G & B & B \\\hline
+N & G & \cellcolor{lightblue} K & \cellcolor{lightblue} K & C & D & \cellcolor{lightblue} C & \cellcolor{lightblue} C & D & N & \cellcolor{lightblue} C & N & F & C & - & B & B \\\hline
+O & O & \cellcolor{lightblue} K & \cellcolor{lightblue} K & \cellcolor{lightblue} C & D & C & C & O & D & A & A & H & C & O & - & B \\\hline
+P & P & P & P & P & D & P & P & P & D & E & P & F & P & P & P & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(11) - Cambios resaltados en azul}
+\end{table}
+
+\subsubsection{Iteración 12 (k = 12) - Nodo intermedio: L}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & 0 & 17 & 17 & 22 & 28 & 26 & 22 & \cellcolor{lightgreen} 49 & 31 & 15 & 16 & 27 & 24 & 24 & 22 & 25 \\\hline
+B & 15 & 0 & 9 & 14 & 20 & 18 & 14 & \cellcolor{lightgreen} 41 & 23 & 18 & 8 & 19 & 16 & 16 & 5 & 8 \\\hline
+C & 6 & 4 & 0 & 5 & 11 & 9 & 5 & \cellcolor{lightgreen} 32 & 14 & 9 & 3 & 10 & 7 & 7 & 9 & 12 \\\hline
+D & 6 & \cellcolor{lightgreen} 12 & 14 & 0 & 6 & 7 & 8 & \cellcolor{lightgreen} 30 & 9 & 15 & 13 & 8 & 6 & 6 & \cellcolor{lightgreen} 17 & \cellcolor{lightgreen} 20 \\\hline
+E & 0 & 8 & 8 & 13 & 0 & 11 & 12 & \cellcolor{lightgreen} 34 & 22 & 9 & 7 & 12 & 15 & 14 & 13 & 16 \\\hline
+F & 2 & \cellcolor{lightgreen} 5 & 10 & 15 & \cellcolor{lightgreen} 2 & 0 & 1 & \cellcolor{lightgreen} 23 & 24 & \cellcolor{lightgreen} 11 & 9 & 1 & 17 & 3 & \cellcolor{lightgreen} 10 & \cellcolor{lightgreen} 13 \\\hline
+G & 1 & 18 & 18 & 23 & 29 & 27 & 0 & \cellcolor{lightgreen} 50 & 32 & 16 & 17 & 28 & 25 & 2 & 23 & 26 \\\hline
+H & 2 & 19 & 19 & 24 & \cellcolor{lightgreen} 24 & 28 & 24 & 0 & 33 & 17 & 18 & 23 & 26 & 3 & 24 & 27 \\\hline
+I & 27 & 25 & 21 & 26 & 32 & 30 & 26 & \cellcolor{lightgreen} 53 & 0 & 30 & 24 & 31 & 28 & 28 & 30 & 33 \\\hline
+J & 28 & 26 & 22 & 27 & 33 & 31 & 27 & \cellcolor{lightgreen} 54 & 36 & 0 & 25 & 32 & 29 & 29 & 31 & 34 \\\hline
+K & 7 & 1 & 1 & 6 & 12 & 10 & 6 & \cellcolor{lightgreen} 33 & 15 & 10 & 0 & 11 & 8 & 8 & 6 & 9 \\\hline
+L & 1 & 4 & 9 & 14 & 1 & 12 & 1 & 22 & 23 & 10 & 8 & 0 & 16 & 3 & 9 & 12 \\\hline
+M & 4 & 7 & 16 & 21 & 27 & 25 & 4 & 5 & 9 & 19 & 15 & 26 & 0 & 6 & 12 & 15 \\\hline
+N & 10 & 4 & 4 & 9 & 15 & 13 & 9 & \cellcolor{lightgreen} 36 & 15 & 13 & 3 & 14 & 11 & 0 & 9 & 12 \\\hline
+O & 5 & 22 & 22 & 27 & 33 & 31 & 27 & 9 & 36 & 20 & 21 & 32 & 29 & 2 & 0 & 30 \\\hline
+P & 4 & 6 & 9 & 0 & \cellcolor{lightgreen} 4 & 2 & 3 & 13 & 9 & \cellcolor{lightgreen} 13 & 11 & 3 & 3 & 0 & 9 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(12) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & - & K & K & C & D & C & C & \cellcolor{lightblue} L & D & A & A & F & C & G & B & B \\\hline
+B & G & - & K & C & D & C & C & \cellcolor{lightblue} L & D & C & B & F & C & G & B & B \\\hline
+C & G & K & - & C & D & C & C & \cellcolor{lightblue} L & D & C & C & F & C & G & B & B \\\hline
+D & E & \cellcolor{lightblue} L & K & - & D & D & F & \cellcolor{lightblue} L & D & E & E & F & D & D & B & B \\\hline
+E & E & K & K & C & - & E & F & \cellcolor{lightblue} L & D & E & E & E & C & G & B & B \\\hline
+F & G & \cellcolor{lightblue} L & K & C & \cellcolor{lightblue} L & - & F & \cellcolor{lightblue} L & D & \cellcolor{lightblue} E & F & F & C & G & B & B \\\hline
+G & G & K & K & C & D & C & - & \cellcolor{lightblue} L & D & A & G & F & C & G & B & B \\\hline
+H & H & K & K & C & \cellcolor{lightblue} L & C & C & - & D & A & A & H & C & H & B & B \\\hline
+I & G & K & I & C & D & C & C & \cellcolor{lightblue} L & - & C & C & F & C & G & B & B \\\hline
+J & G & K & J & J & D & C & C & \cellcolor{lightblue} L & D & - & C & F & C & G & B & B \\\hline
+K & G & K & K & C & D & C & C & \cellcolor{lightblue} L & D & C & - & F & C & G & B & B \\\hline
+L & E & L & K & C & L & E & L & L & D & E & E & - & C & G & B & B \\\hline
+M & M & M & K & C & D & C & M & M & M & A & B & F & - & G & B & B \\\hline
+N & G & K & K & C & D & C & C & \cellcolor{lightblue} L & N & C & N & F & C & - & B & B \\\hline
+O & O & K & K & C & D & C & C & O & D & A & A & H & C & O & - & B \\\hline
+P & P & P & P & P & \cellcolor{lightblue} L & P & P & P & D & E & P & F & P & P & P & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(12) - Cambios resaltados en azul}
+\end{table}
+
+\subsubsection{Iteración 13 (k = 13) - Nodo intermedio: M}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & 0 & 17 & 17 & 22 & 28 & 26 & 22 & \cellcolor{lightgreen} 29 & 31 & 15 & 16 & 27 & 24 & 24 & 22 & 25 \\\hline
+B & 15 & 0 & 9 & 14 & 20 & 18 & 14 & \cellcolor{lightgreen} 21 & 23 & 18 & 8 & 19 & 16 & 16 & 5 & 8 \\\hline
+C & 6 & 4 & 0 & 5 & 11 & 9 & 5 & \cellcolor{lightgreen} 12 & 14 & 9 & 3 & 10 & 7 & 7 & 9 & 12 \\\hline
+D & 6 & 12 & 14 & 0 & 6 & 7 & 8 & \cellcolor{lightgreen} 11 & 9 & 15 & 13 & 8 & 6 & 6 & 17 & 20 \\\hline
+E & 0 & 8 & 8 & 13 & 0 & 11 & 12 & \cellcolor{lightgreen} 20 & 22 & 9 & 7 & 12 & 15 & 14 & 13 & 16 \\\hline
+F & 2 & 5 & 10 & 15 & 2 & 0 & 1 & \cellcolor{lightgreen} 22 & 24 & 11 & 9 & 1 & 17 & 3 & 10 & 13 \\\hline
+G & 1 & 18 & 18 & 23 & 29 & 27 & 0 & \cellcolor{lightgreen} 30 & 32 & 16 & 17 & 28 & 25 & 2 & 23 & 26 \\\hline
+H & 2 & 19 & 19 & 24 & 24 & 28 & 24 & 0 & 33 & 17 & 18 & 23 & 26 & 3 & 24 & 27 \\\hline
+I & 27 & 25 & 21 & 26 & 32 & 30 & 26 & \cellcolor{lightgreen} 33 & 0 & 30 & 24 & 31 & 28 & 28 & 30 & 33 \\\hline
+J & 28 & 26 & 22 & 27 & 33 & 31 & 27 & \cellcolor{lightgreen} 34 & 36 & 0 & 25 & 32 & 29 & 29 & 31 & 34 \\\hline
+K & 7 & 1 & 1 & 6 & 12 & 10 & 6 & \cellcolor{lightgreen} 13 & 15 & 10 & 0 & 11 & 8 & 8 & 6 & 9 \\\hline
+L & 1 & 4 & 9 & 14 & 1 & 12 & 1 & \cellcolor{lightgreen} 21 & 23 & 10 & 8 & 0 & 16 & 3 & 9 & 12 \\\hline
+M & 4 & 7 & 16 & 21 & 27 & 25 & 4 & 5 & 9 & 19 & 15 & 26 & 0 & 6 & 12 & 15 \\\hline
+N & 10 & 4 & 4 & 9 & 15 & 13 & 9 & \cellcolor{lightgreen} 16 & 15 & 13 & 3 & 14 & 11 & 0 & 9 & 12 \\\hline
+O & 5 & 22 & 22 & 27 & 33 & 31 & 27 & 9 & 36 & 20 & 21 & 32 & 29 & 2 & 0 & 30 \\\hline
+P & 4 & 6 & 9 & 0 & 4 & 2 & 3 & \cellcolor{lightgreen} 8 & 9 & 13 & 11 & 3 & 3 & 0 & 9 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(13) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & - & K & K & C & D & C & C & \cellcolor{lightblue} M & D & A & A & F & C & G & B & B \\\hline
+B & G & - & K & C & D & C & C & \cellcolor{lightblue} M & D & C & B & F & C & G & B & B \\\hline
+C & G & K & - & C & D & C & C & \cellcolor{lightblue} M & D & C & C & F & C & G & B & B \\\hline
+D & E & L & K & - & D & D & F & \cellcolor{lightblue} M & D & E & E & F & D & D & B & B \\\hline
+E & E & K & K & C & - & E & F & \cellcolor{lightblue} M & D & E & E & E & C & G & B & B \\\hline
+F & G & L & K & C & L & - & F & \cellcolor{lightblue} M & D & E & F & F & C & G & B & B \\\hline
+G & G & K & K & C & D & C & - & \cellcolor{lightblue} M & D & A & G & F & C & G & B & B \\\hline
+H & H & K & K & C & L & C & C & - & D & A & A & H & C & H & B & B \\\hline
+I & G & K & I & C & D & C & C & \cellcolor{lightblue} M & - & C & C & F & C & G & B & B \\\hline
+J & G & K & J & J & D & C & C & \cellcolor{lightblue} M & D & - & C & F & C & G & B & B \\\hline
+K & G & K & K & C & D & C & C & \cellcolor{lightblue} M & D & C & - & F & C & G & B & B \\\hline
+L & E & L & K & C & L & E & L & \cellcolor{lightblue} M & D & E & E & - & C & G & B & B \\\hline
+M & M & M & K & C & D & C & M & M & M & A & B & F & - & G & B & B \\\hline
+N & G & K & K & C & D & C & C & \cellcolor{lightblue} M & N & C & N & F & C & - & B & B \\\hline
+O & O & K & K & C & D & C & C & O & D & A & A & H & C & O & - & B \\\hline
+P & P & P & P & P & L & P & P & \cellcolor{lightblue} M & D & E & P & F & P & P & P & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(13) - Cambios resaltados en azul}
+\end{table}
+
+\subsubsection{Iteración 14 (k = 14) - Nodo intermedio: N}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & 0 & 17 & 17 & 22 & 28 & 26 & 22 & 29 & 31 & 15 & 16 & 27 & 24 & 24 & 22 & 25 \\\hline
+B & 15 & 0 & 9 & 14 & 20 & 18 & 14 & 21 & 23 & 18 & 8 & 19 & 16 & 16 & 5 & 8 \\\hline
+C & 6 & 4 & 0 & 5 & 11 & 9 & 5 & 12 & 14 & 9 & 3 & 10 & 7 & 7 & 9 & 12 \\\hline
+D & 6 & \cellcolor{lightgreen} 10 & \cellcolor{lightgreen} 10 & 0 & 6 & 7 & 8 & 11 & 9 & 15 & \cellcolor{lightgreen} 9 & 8 & 6 & 6 & \cellcolor{lightgreen} 15 & \cellcolor{lightgreen} 18 \\\hline
+E & 0 & 8 & 8 & 13 & 0 & 11 & 12 & 20 & 22 & 9 & 7 & 12 & 15 & 14 & 13 & 16 \\\hline
+F & 2 & 5 & \cellcolor{lightgreen} 7 & \cellcolor{lightgreen} 12 & 2 & 0 & 1 & \cellcolor{lightgreen} 19 & \cellcolor{lightgreen} 18 & 11 & \cellcolor{lightgreen} 6 & 1 & \cellcolor{lightgreen} 14 & 3 & 10 & 13 \\\hline
+G & 1 & \cellcolor{lightgreen} 6 & \cellcolor{lightgreen} 6 & \cellcolor{lightgreen} 11 & \cellcolor{lightgreen} 17 & \cellcolor{lightgreen} 15 & 0 & \cellcolor{lightgreen} 18 & \cellcolor{lightgreen} 17 & \cellcolor{lightgreen} 15 & \cellcolor{lightgreen} 5 & \cellcolor{lightgreen} 16 & \cellcolor{lightgreen} 13 & 2 & \cellcolor{lightgreen} 11 & \cellcolor{lightgreen} 14 \\\hline
+H & 2 & \cellcolor{lightgreen} 7 & \cellcolor{lightgreen} 7 & \cellcolor{lightgreen} 12 & \cellcolor{lightgreen} 18 & \cellcolor{lightgreen} 16 & \cellcolor{lightgreen} 12 & 0 & \cellcolor{lightgreen} 18 & \cellcolor{lightgreen} 16 & \cellcolor{lightgreen} 6 & \cellcolor{lightgreen} 17 & \cellcolor{lightgreen} 14 & 3 & \cellcolor{lightgreen} 12 & \cellcolor{lightgreen} 15 \\\hline
+I & 27 & 25 & 21 & 26 & 32 & 30 & 26 & 33 & 0 & 30 & 24 & 31 & 28 & 28 & 30 & 33 \\\hline
+J & 28 & 26 & 22 & 27 & 33 & 31 & 27 & 34 & 36 & 0 & 25 & 32 & 29 & 29 & 31 & 34 \\\hline
+K & 7 & 1 & 1 & 6 & 12 & 10 & 6 & 13 & 15 & 10 & 0 & 11 & 8 & 8 & 6 & 9 \\\hline
+L & 1 & 4 & \cellcolor{lightgreen} 7 & \cellcolor{lightgreen} 12 & 1 & 12 & 1 & \cellcolor{lightgreen} 19 & \cellcolor{lightgreen} 18 & 10 & \cellcolor{lightgreen} 6 & 0 & \cellcolor{lightgreen} 14 & 3 & 9 & 12 \\\hline
+M & 4 & 7 & \cellcolor{lightgreen} 10 & \cellcolor{lightgreen} 15 & \cellcolor{lightgreen} 21 & \cellcolor{lightgreen} 19 & 4 & 5 & 9 & 19 & \cellcolor{lightgreen} 9 & \cellcolor{lightgreen} 20 & 0 & 6 & 12 & 15 \\\hline
+N & 10 & 4 & 4 & 9 & 15 & 13 & 9 & 16 & 15 & 13 & 3 & 14 & 11 & 0 & 9 & 12 \\\hline
+O & 5 & \cellcolor{lightgreen} 6 & \cellcolor{lightgreen} 6 & \cellcolor{lightgreen} 11 & \cellcolor{lightgreen} 17 & \cellcolor{lightgreen} 15 & \cellcolor{lightgreen} 11 & 9 & \cellcolor{lightgreen} 17 & \cellcolor{lightgreen} 15 & \cellcolor{lightgreen} 5 & \cellcolor{lightgreen} 16 & \cellcolor{lightgreen} 13 & 2 & 0 & \cellcolor{lightgreen} 14 \\\hline
+P & 4 & \cellcolor{lightgreen} 4 & \cellcolor{lightgreen} 4 & 0 & 4 & 2 & 3 & 8 & 9 & 13 & \cellcolor{lightgreen} 3 & 3 & 3 & 0 & 9 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(14) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & - & K & K & C & D & C & C & M & D & A & A & F & C & G & B & B \\\hline
+B & G & - & K & C & D & C & C & M & D & C & B & F & C & G & B & B \\\hline
+C & G & K & - & C & D & C & C & M & D & C & C & F & C & G & B & B \\\hline
+D & E & \cellcolor{lightblue} K & K & - & D & D & F & M & D & E & \cellcolor{lightblue} N & F & D & D & B & B \\\hline
+E & E & K & K & C & - & E & F & M & D & E & E & E & C & G & B & B \\\hline
+F & G & L & K & C & L & - & F & M & \cellcolor{lightblue} N & E & \cellcolor{lightblue} N & F & C & G & B & B \\\hline
+G & G & K & K & C & D & C & - & M & \cellcolor{lightblue} N & \cellcolor{lightblue} C & \cellcolor{lightblue} N & F & C & G & B & B \\\hline
+H & H & K & K & C & \cellcolor{lightblue} D & C & C & - & \cellcolor{lightblue} N & \cellcolor{lightblue} C & \cellcolor{lightblue} N & \cellcolor{lightblue} F & C & H & B & B \\\hline
+I & G & K & I & C & D & C & C & M & - & C & C & F & C & G & B & B \\\hline
+J & G & K & J & J & D & C & C & M & D & - & C & F & C & G & B & B \\\hline
+K & G & K & K & C & D & C & C & M & D & C & - & F & C & G & B & B \\\hline
+L & E & L & K & C & L & E & L & M & \cellcolor{lightblue} N & E & \cellcolor{lightblue} N & - & C & G & B & B \\\hline
+M & M & M & K & C & D & C & M & M & M & A & \cellcolor{lightblue} N & F & - & G & B & B \\\hline
+N & G & K & K & C & D & C & C & M & N & C & N & F & C & - & B & B \\\hline
+O & O & K & K & C & D & C & C & O & \cellcolor{lightblue} N & \cellcolor{lightblue} C & \cellcolor{lightblue} N & \cellcolor{lightblue} F & C & O & - & B \\\hline
+P & P & \cellcolor{lightblue} K & \cellcolor{lightblue} K & P & L & P & P & M & D & E & \cellcolor{lightblue} N & F & P & P & P & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(14) - Cambios resaltados en azul}
+\end{table}
+
+\subsubsection{Iteración 15 (k = 15) - Nodo intermedio: O}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & 0 & 17 & 17 & 22 & 28 & 26 & 22 & 29 & 31 & 15 & 16 & 27 & 24 & 24 & 22 & 25 \\\hline
+B & \cellcolor{lightgreen} 10 & 0 & 9 & 14 & 20 & 18 & 14 & \cellcolor{lightgreen} 14 & \cellcolor{lightgreen} 22 & 18 & 8 & 19 & 16 & \cellcolor{lightgreen} 7 & 5 & 8 \\\hline
+C & 6 & 4 & 0 & 5 & 11 & 9 & 5 & 12 & 14 & 9 & 3 & 10 & 7 & 7 & 9 & 12 \\\hline
+D & 6 & 10 & 10 & 0 & 6 & 7 & 8 & 11 & 9 & 15 & 9 & 8 & 6 & 6 & 15 & 18 \\\hline
+E & 0 & 8 & 8 & 13 & 0 & 11 & 12 & 20 & 22 & 9 & 7 & 12 & 15 & 14 & 13 & 16 \\\hline
+F & 2 & 5 & 7 & 12 & 2 & 0 & 1 & 19 & 18 & 11 & 6 & 1 & 14 & 3 & 10 & 13 \\\hline
+G & 1 & 6 & 6 & 11 & 17 & 15 & 0 & 18 & 17 & 15 & 5 & 16 & 13 & 2 & 11 & 14 \\\hline
+H & 2 & 7 & 7 & 12 & 18 & 16 & 12 & 0 & 18 & 16 & 6 & 17 & 14 & 3 & 12 & 15 \\\hline
+I & 27 & 25 & 21 & 26 & 32 & 30 & 26 & 33 & 0 & 30 & 24 & 31 & 28 & 28 & 30 & 33 \\\hline
+J & 28 & 26 & 22 & 27 & 33 & 31 & 27 & 34 & 36 & 0 & 25 & 32 & 29 & 29 & 31 & 34 \\\hline
+K & 7 & 1 & 1 & 6 & 12 & 10 & 6 & 13 & 15 & 10 & 0 & 11 & 8 & 8 & 6 & 9 \\\hline
+L & 1 & 4 & 7 & 12 & 1 & 12 & 1 & \cellcolor{lightgreen} 18 & 18 & 10 & 6 & 0 & 14 & 3 & 9 & 12 \\\hline
+M & 4 & 7 & 10 & 15 & 21 & 19 & 4 & 5 & 9 & 19 & 9 & 20 & 0 & 6 & 12 & 15 \\\hline
+N & 10 & 4 & 4 & 9 & 15 & 13 & 9 & 16 & 15 & 13 & 3 & 14 & 11 & 0 & 9 & 12 \\\hline
+O & 5 & 6 & 6 & 11 & 17 & 15 & 11 & 9 & 17 & 15 & 5 & 16 & 13 & 2 & 0 & 14 \\\hline
+P & 4 & 4 & 4 & 0 & 4 & 2 & 3 & 8 & 9 & 13 & 3 & 3 & 3 & 0 & 9 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(15) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & - & K & K & C & D & C & C & M & D & A & A & F & C & G & B & B \\\hline
+B & \cellcolor{lightblue} O & - & K & C & D & C & C & \cellcolor{lightblue} O & \cellcolor{lightblue} N & C & B & F & C & \cellcolor{lightblue} O & B & B \\\hline
+C & G & K & - & C & D & C & C & M & D & C & C & F & C & G & B & B \\\hline
+D & E & K & K & - & D & D & F & M & D & E & N & F & D & D & B & B \\\hline
+E & E & K & K & C & - & E & F & M & D & E & E & E & C & G & B & B \\\hline
+F & G & L & K & C & L & - & F & M & N & E & N & F & C & G & B & B \\\hline
+G & G & K & K & C & D & C & - & M & N & C & N & F & C & G & B & B \\\hline
+H & H & K & K & C & D & C & C & - & N & C & N & F & C & H & B & B \\\hline
+I & G & K & I & C & D & C & C & M & - & C & C & F & C & G & B & B \\\hline
+J & G & K & J & J & D & C & C & M & D & - & C & F & C & G & B & B \\\hline
+K & G & K & K & C & D & C & C & M & D & C & - & F & C & G & B & B \\\hline
+L & E & L & K & C & L & E & L & \cellcolor{lightblue} O & N & E & N & - & C & G & B & B \\\hline
+M & M & M & K & C & D & C & M & M & M & A & N & F & - & G & B & B \\\hline
+N & G & K & K & C & D & C & C & M & N & C & N & F & C & - & B & B \\\hline
+O & O & K & K & C & D & C & C & O & N & C & N & F & C & O & - & B \\\hline
+P & P & K & K & P & L & P & P & M & D & E & N & F & P & P & P & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(15) - Cambios resaltados en azul}
+\end{table}
+
+\subsubsection{Iteración 16 (k = 16) - Nodo intermedio: P}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & 0 & 17 & 17 & 22 & 28 & 26 & 22 & 29 & 31 & 15 & 16 & 27 & 24 & 24 & 22 & 25 \\\hline
+B & 10 & 0 & 9 & \cellcolor{lightgreen} 8 & \cellcolor{lightgreen} 12 & \cellcolor{lightgreen} 10 & \cellcolor{lightgreen} 11 & 14 & \cellcolor{lightgreen} 17 & 18 & 8 & \cellcolor{lightgreen} 11 & \cellcolor{lightgreen} 11 & 7 & 5 & 8 \\\hline
+C & 6 & 4 & 0 & 5 & 11 & 9 & 5 & 12 & 14 & 9 & 3 & 10 & 7 & 7 & 9 & 12 \\\hline
+D & 6 & 10 & 10 & 0 & 6 & 7 & 8 & 11 & 9 & 15 & 9 & 8 & 6 & 6 & 15 & 18 \\\hline
+E & 0 & 8 & 8 & 13 & 0 & 11 & 12 & 20 & 22 & 9 & 7 & 12 & 15 & 14 & 13 & 16 \\\hline
+F & 2 & 5 & 7 & 12 & 2 & 0 & 1 & 19 & 18 & 11 & 6 & 1 & 14 & 3 & 10 & 13 \\\hline
+G & 1 & 6 & 6 & 11 & 17 & 15 & 0 & 18 & 17 & 15 & 5 & 16 & 13 & 2 & 11 & 14 \\\hline
+H & 2 & 7 & 7 & 12 & 18 & 16 & 12 & 0 & 18 & 16 & 6 & 17 & 14 & 3 & 12 & 15 \\\hline
+I & 27 & 25 & 21 & 26 & 32 & 30 & 26 & 33 & 0 & 30 & 24 & 31 & 28 & 28 & 30 & 33 \\\hline
+J & 28 & 26 & 22 & 27 & 33 & 31 & 27 & 34 & 36 & 0 & 25 & 32 & 29 & 29 & 31 & 34 \\\hline
+K & 7 & 1 & 1 & 6 & 12 & 10 & 6 & 13 & 15 & 10 & 0 & 11 & 8 & 8 & 6 & 9 \\\hline
+L & 1 & 4 & 7 & 12 & 1 & 12 & 1 & 18 & 18 & 10 & 6 & 0 & 14 & 3 & 9 & 12 \\\hline
+M & 4 & 7 & 10 & 15 & \cellcolor{lightgreen} 19 & \cellcolor{lightgreen} 17 & 4 & 5 & 9 & 19 & 9 & \cellcolor{lightgreen} 18 & 0 & 6 & 12 & 15 \\\hline
+N & 10 & 4 & 4 & 9 & 15 & 13 & 9 & 16 & 15 & 13 & 3 & 14 & 11 & 0 & 9 & 12 \\\hline
+O & 5 & 6 & 6 & 11 & 17 & 15 & 11 & 9 & 17 & 15 & 5 & 16 & 13 & 2 & 0 & 14 \\\hline
+P & 4 & 4 & 4 & 0 & 4 & 2 & 3 & 8 & 9 & 13 & 3 & 3 & 3 & 0 & 9 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(16) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & - & K & K & C & D & C & C & M & D & A & A & F & C & G & B & B \\\hline
+B & O & - & K & \cellcolor{lightblue} P & \cellcolor{lightblue} L & \cellcolor{lightblue} P & \cellcolor{lightblue} P & O & \cellcolor{lightblue} D & C & B & F & \cellcolor{lightblue} P & O & B & B \\\hline
+C & G & K & - & C & D & C & C & M & D & C & C & F & C & G & B & B \\\hline
+D & E & K & K & - & D & D & F & M & D & E & N & F & D & D & B & B \\\hline
+E & E & K & K & C & - & E & F & M & D & E & E & E & C & G & B & B \\\hline
+F & G & L & K & C & L & - & F & M & N & E & N & F & C & G & B & B \\\hline
+G & G & K & K & C & D & C & - & M & N & C & N & F & C & G & B & B \\\hline
+H & H & K & K & C & D & C & C & - & N & C & N & F & C & H & B & B \\\hline
+I & G & K & I & C & D & C & C & M & - & C & C & F & C & G & B & B \\\hline
+J & G & K & J & J & D & C & C & M & D & - & C & F & C & G & B & B \\\hline
+K & G & K & K & C & D & C & C & M & D & C & - & F & C & G & B & B \\\hline
+L & E & L & K & C & L & E & L & O & N & E & N & - & C & G & B & B \\\hline
+M & M & M & K & C & \cellcolor{lightblue} L & \cellcolor{lightblue} P & M & M & M & A & N & F & - & G & B & B \\\hline
+N & G & K & K & C & D & C & C & M & N & C & N & F & C & - & B & B \\\hline
+O & O & K & K & C & D & C & C & O & N & C & N & F & C & O & - & B \\\hline
+P & P & K & K & P & L & P & P & M & D & E & N & F & P & P & P & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(16) - Cambios resaltados en azul}
+\end{table}
+
+\clearpage
+\section{Resultados Finales}
+\subsection{Matriz de Distancias Final D(16)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & 0 & 17 & 17 & 22 & 28 & 26 & 22 & 29 & 31 & 15 & 16 & 27 & 24 & 24 & 22 & 25 \\\hline
+B & 10 & 0 & 9 & 8 & 12 & 10 & 11 & 14 & 17 & 18 & 8 & 11 & 11 & 7 & 5 & 8 \\\hline
+C & 6 & 4 & 0 & 5 & 11 & 9 & 5 & 12 & 14 & 9 & 3 & 10 & 7 & 7 & 9 & 12 \\\hline
+D & 6 & 10 & 10 & 0 & 6 & 7 & 8 & 11 & 9 & 15 & 9 & 8 & 6 & 6 & 15 & 18 \\\hline
+E & 0 & 8 & 8 & 13 & 0 & 11 & 12 & 20 & 22 & 9 & 7 & 12 & 15 & 14 & 13 & 16 \\\hline
+F & 2 & 5 & 7 & 12 & 2 & 0 & 1 & 19 & 18 & 11 & 6 & 1 & 14 & 3 & 10 & 13 \\\hline
+G & 1 & 6 & 6 & 11 & 17 & 15 & 0 & 18 & 17 & 15 & 5 & 16 & 13 & 2 & 11 & 14 \\\hline
+H & 2 & 7 & 7 & 12 & 18 & 16 & 12 & 0 & 18 & 16 & 6 & 17 & 14 & 3 & 12 & 15 \\\hline
+I & 27 & 25 & 21 & 26 & 32 & 30 & 26 & 33 & 0 & 30 & 24 & 31 & 28 & 28 & 30 & 33 \\\hline
+J & 28 & 26 & 22 & 27 & 33 & 31 & 27 & 34 & 36 & 0 & 25 & 32 & 29 & 29 & 31 & 34 \\\hline
+K & 7 & 1 & 1 & 6 & 12 & 10 & 6 & 13 & 15 & 10 & 0 & 11 & 8 & 8 & 6 & 9 \\\hline
+L & 1 & 4 & 7 & 12 & 1 & 12 & 1 & 18 & 18 & 10 & 6 & 0 & 14 & 3 & 9 & 12 \\\hline
+M & 4 & 7 & 10 & 15 & 19 & 17 & 4 & 5 & 9 & 19 & 9 & 18 & 0 & 6 & 12 & 15 \\\hline
+N & 10 & 4 & 4 & 9 & 15 & 13 & 9 & 16 & 15 & 13 & 3 & 14 & 11 & 0 & 9 & 12 \\\hline
+O & 5 & 6 & 6 & 11 & 17 & 15 & 11 & 9 & 17 & 15 & 5 & 16 & 13 & 2 & 0 & 14 \\\hline
+P & 4 & 4 & 4 & 0 & 4 & 2 & 3 & 8 & 9 & 13 & 3 & 3 & 3 & 0 & 9 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias final D(16)}
+\end{table}
+
+\clearpage
+\subsection{Matriz de Caminos Final P(16)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H & I & J & K & L & M & N & O & P \\\hline
+A & - & K & K & C & D & C & C & M & D & A & A & F & C & G & B & B \\\hline
+B & O & - & K & P & L & P & P & O & D & C & B & F & P & O & B & B \\\hline
+C & G & K & - & C & D & C & C & M & D & C & C & F & C & G & B & B \\\hline
+D & E & K & K & - & D & D & F & M & D & E & N & F & D & D & B & B \\\hline
+E & E & K & K & C & - & E & F & M & D & E & E & E & C & G & B & B \\\hline
+F & G & L & K & C & L & - & F & M & N & E & N & F & C & G & B & B \\\hline
+G & G & K & K & C & D & C & - & M & N & C & N & F & C & G & B & B \\\hline
+H & H & K & K & C & D & C & C & - & N & C & N & F & C & H & B & B \\\hline
+I & G & K & I & C & D & C & C & M & - & C & C & F & C & G & B & B \\\hline
+J & G & K & J & J & D & C & C & M & D & - & C & F & C & G & B & B \\\hline
+K & G & K & K & C & D & C & C & M & D & C & - & F & C & G & B & B \\\hline
+L & E & L & K & C & L & E & L & O & N & E & N & - & C & G & B & B \\\hline
+M & M & M & K & C & L & P & M & M & M & A & N & F & - & G & B & B \\\hline
+N & G & K & K & C & D & C & C & M & N & C & N & F & C & - & B & B \\\hline
+O & O & K & K & C & D & C & C & O & N & C & N & F & C & O & - & B \\\hline
+P & P & K & K & P & L & P & P & M & D & E & N & F & P & P & P & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos final P(16)}
+\end{table}
+
+\clearpage
+\subsection{Rutas Óptimas}
+\begin{itemize}
+\item \textbf{A → B:} Distancia: 17, Ruta: A → K → B
+\item \textbf{A → C:} Distancia: 17, Ruta: A → K → C
+\item \textbf{A → D:} Distancia: 22, Ruta: A → K → C → D
+\item \textbf{A → E:} Distancia: 28, Ruta: A → K → C → D → E
+\item \textbf{A → F:} Distancia: 26, Ruta: A → K → C → F
+\item \textbf{A → G:} Distancia: 22, Ruta: A → K → C → G
+\item \textbf{A → H:} Distancia: 29, Ruta: A → K → C → M → H
+\item \textbf{A → I:} Distancia: 31, Ruta: A → K → C → D → I
+\item \textbf{A → J:} Distancia: 15, Ruta: A → J
+\item \textbf{A → K:} Distancia: 16, Ruta: A → K
+\item \textbf{A → L:} Distancia: 27, Ruta: A → K → C → F → L
+\item \textbf{A → M:} Distancia: 24, Ruta: A → K → C → M
+\item \textbf{A → N:} Distancia: 24, Ruta: A → K → C → G → N
+\item \textbf{A → O:} Distancia: 22, Ruta: A → K → B → O
+\item \textbf{A → P:} Distancia: 25, Ruta: A → K → B → P
+\item \textbf{B → A:} Distancia: 10, Ruta: B → O → A
+\item \textbf{B → C:} Distancia: 9, Ruta: B → K → C
+\item \textbf{B → D:} Distancia: 8, Ruta: B → P → D
+\item \textbf{B → E:} Distancia: 12, Ruta: B → P → F → L → E
+\item \textbf{B → F:} Distancia: 10, Ruta: B → P → F
+\item \textbf{B → G:} Distancia: 11, Ruta: B → P → G
+\item \textbf{B → H:} Distancia: 14, Ruta: B → O → H
+\item \textbf{B → I:} Distancia: 17, Ruta: B → P → D → I
+\item \textbf{B → J:} Distancia: 18, Ruta: B → K → C → J
+\item \textbf{B → K:} Distancia: 8, Ruta: B → K
+\item \textbf{B → L:} Distancia: 11, Ruta: B → P → F → L
+\item \textbf{B → M:} Distancia: 11, Ruta: B → P → M
+\item \textbf{B → N:} Distancia: 7, Ruta: B → O → N
+\item \textbf{B → O:} Distancia: 5, Ruta: B → O
+\item \textbf{B → P:} Distancia: 8, Ruta: B → P
+\item \textbf{C → A:} Distancia: 6, Ruta: C → G → A
+\item \textbf{C → B:} Distancia: 4, Ruta: C → K → B
+\item \textbf{C → D:} Distancia: 5, Ruta: C → D
+\item \textbf{C → E:} Distancia: 11, Ruta: C → D → E
+\item \textbf{C → F:} Distancia: 9, Ruta: C → F
+\item \textbf{C → G:} Distancia: 5, Ruta: C → G
+\item \textbf{C → H:} Distancia: 12, Ruta: C → M → H
+\item \textbf{C → I:} Distancia: 14, Ruta: C → D → I
+\item \textbf{C → J:} Distancia: 9, Ruta: C → J
+\item \textbf{C → K:} Distancia: 3, Ruta: C → K
+\item \textbf{C → L:} Distancia: 10, Ruta: C → F → L
+\item \textbf{C → M:} Distancia: 7, Ruta: C → M
+\item \textbf{C → N:} Distancia: 7, Ruta: C → G → N
+\item \textbf{C → O:} Distancia: 9, Ruta: C → K → B → O
+\item \textbf{C → P:} Distancia: 12, Ruta: C → K → B → P
+\item \textbf{D → A:} Distancia: 6, Ruta: D → E → A
+\item \textbf{D → B:} Distancia: 10, Ruta: D → N → K → B
+\item \textbf{D → C:} Distancia: 10, Ruta: D → N → K → C
+\item \textbf{D → E:} Distancia: 6, Ruta: D → E
+\item \textbf{D → F:} Distancia: 7, Ruta: D → F
+\item \textbf{D → G:} Distancia: 8, Ruta: D → F → G
+\item \textbf{D → H:} Distancia: 11, Ruta: D → M → H
+\item \textbf{D → I:} Distancia: 9, Ruta: D → I
+\item \textbf{D → J:} Distancia: 15, Ruta: D → E → J
+\item \textbf{D → K:} Distancia: 9, Ruta: D → N → K
+\item \textbf{D → L:} Distancia: 8, Ruta: D → F → L
+\item \textbf{D → M:} Distancia: 6, Ruta: D → M
+\item \textbf{D → N:} Distancia: 6, Ruta: D → N
+\item \textbf{D → O:} Distancia: 15, Ruta: D → N → K → B → O
+\item \textbf{D → P:} Distancia: 18, Ruta: D → N → K → B → P
+\item \textbf{E → A:} Distancia: 0, Ruta: E → A
+\item \textbf{E → B:} Distancia: 8, Ruta: E → K → B
+\item \textbf{E → C:} Distancia: 8, Ruta: E → K → C
+\item \textbf{E → D:} Distancia: 13, Ruta: E → K → C → D
+\item \textbf{E → F:} Distancia: 11, Ruta: E → F
+\item \textbf{E → G:} Distancia: 12, Ruta: E → F → G
+\item \textbf{E → H:} Distancia: 20, Ruta: E → K → C → M → H
+\item \textbf{E → I:} Distancia: 22, Ruta: E → K → C → D → I
+\item \textbf{E → J:} Distancia: 9, Ruta: E → J
+\item \textbf{E → K:} Distancia: 7, Ruta: E → K
+\item \textbf{E → L:} Distancia: 12, Ruta: E → L
+\item \textbf{E → M:} Distancia: 15, Ruta: E → K → C → M
+\item \textbf{E → N:} Distancia: 14, Ruta: E → F → G → N
+\item \textbf{E → O:} Distancia: 13, Ruta: E → K → B → O
+\item \textbf{E → P:} Distancia: 16, Ruta: E → K → B → P
+\item \textbf{F → A:} Distancia: 2, Ruta: F → G → A
+\item \textbf{F → B:} Distancia: 5, Ruta: F → L → B
+\item \textbf{F → C:} Distancia: 7, Ruta: F → G → N → K → C
+\item \textbf{F → D:} Distancia: 12, Ruta: F → G → N → K → C → D
+\item \textbf{F → E:} Distancia: 2, Ruta: F → L → E
+\item \textbf{F → G:} Distancia: 1, Ruta: F → G
+\item \textbf{F → H:} Distancia: 19, Ruta: F → G → N → K → C → M → H
+\item \textbf{F → I:} Distancia: 18, Ruta: F → G → N → I
+\item \textbf{F → J:} Distancia: 11, Ruta: F → L → E → J
+\item \textbf{F → K:} Distancia: 6, Ruta: F → G → N → K
+\item \textbf{F → L:} Distancia: 1, Ruta: F → L
+\item \textbf{F → M:} Distancia: 14, Ruta: F → G → N → K → C → M
+\item \textbf{F → N:} Distancia: 3, Ruta: F → G → N
+\item \textbf{F → O:} Distancia: 10, Ruta: F → L → B → O
+\item \textbf{F → P:} Distancia: 13, Ruta: F → L → B → P
+\item \textbf{G → A:} Distancia: 1, Ruta: G → A
+\item \textbf{G → B:} Distancia: 6, Ruta: G → N → K → B
+\item \textbf{G → C:} Distancia: 6, Ruta: G → N → K → C
+\item \textbf{G → D:} Distancia: 11, Ruta: G → N → K → C → D
+\item \textbf{G → E:} Distancia: 17, Ruta: G → N → K → C → D → E
+\item \textbf{G → F:} Distancia: 15, Ruta: G → N → K → C → F
+\item \textbf{G → H:} Distancia: 18, Ruta: G → N → K → C → M → H
+\item \textbf{G → I:} Distancia: 17, Ruta: G → N → I
+\item \textbf{G → J:} Distancia: 15, Ruta: G → N → K → C → J
+\item \textbf{G → K:} Distancia: 5, Ruta: G → N → K
+\item \textbf{G → L:} Distancia: 16, Ruta: G → N → K → C → F → L
+\item \textbf{G → M:} Distancia: 13, Ruta: G → N → K → C → M
+\item \textbf{G → N:} Distancia: 2, Ruta: G → N
+\item \textbf{G → O:} Distancia: 11, Ruta: G → N → K → B → O
+\item \textbf{G → P:} Distancia: 14, Ruta: G → N → K → B → P
+\item \textbf{H → A:} Distancia: 2, Ruta: H → A
+\item \textbf{H → B:} Distancia: 7, Ruta: H → N → K → B
+\item \textbf{H → C:} Distancia: 7, Ruta: H → N → K → C
+\item \textbf{H → D:} Distancia: 12, Ruta: H → N → K → C → D
+\item \textbf{H → E:} Distancia: 18, Ruta: H → N → K → C → D → E
+\item \textbf{H → F:} Distancia: 16, Ruta: H → N → K → C → F
+\item \textbf{H → G:} Distancia: 12, Ruta: H → N → K → C → G
+\item \textbf{H → I:} Distancia: 18, Ruta: H → N → I
+\item \textbf{H → J:} Distancia: 16, Ruta: H → N → K → C → J
+\item \textbf{H → K:} Distancia: 6, Ruta: H → N → K
+\item \textbf{H → L:} Distancia: 17, Ruta: H → N → K → C → F → L
+\item \textbf{H → M:} Distancia: 14, Ruta: H → N → K → C → M
+\item \textbf{H → N:} Distancia: 3, Ruta: H → N
+\item \textbf{H → O:} Distancia: 12, Ruta: H → N → K → B → O
+\item \textbf{H → P:} Distancia: 15, Ruta: H → N → K → B → P
+\item \textbf{I → A:} Distancia: 27, Ruta: I → C → G → A
+\item \textbf{I → B:} Distancia: 25, Ruta: I → C → K → B
+\item \textbf{I → C:} Distancia: 21, Ruta: I → C
+\item \textbf{I → D:} Distancia: 26, Ruta: I → C → D
+\item \textbf{I → E:} Distancia: 32, Ruta: I → C → D → E
+\item \textbf{I → F:} Distancia: 30, Ruta: I → C → F
+\item \textbf{I → G:} Distancia: 26, Ruta: I → C → G
+\item \textbf{I → H:} Distancia: 33, Ruta: I → C → M → H
+\item \textbf{I → J:} Distancia: 30, Ruta: I → C → J
+\item \textbf{I → K:} Distancia: 24, Ruta: I → C → K
+\item \textbf{I → L:} Distancia: 31, Ruta: I → C → F → L
+\item \textbf{I → M:} Distancia: 28, Ruta: I → C → M
+\item \textbf{I → N:} Distancia: 28, Ruta: I → C → G → N
+\item \textbf{I → O:} Distancia: 30, Ruta: I → C → K → B → O
+\item \textbf{I → P:} Distancia: 33, Ruta: I → C → K → B → P
+\item \textbf{J → A:} Distancia: 28, Ruta: J → C → G → A
+\item \textbf{J → B:} Distancia: 26, Ruta: J → C → K → B
+\item \textbf{J → C:} Distancia: 22, Ruta: J → C
+\item \textbf{J → D:} Distancia: 27, Ruta: J → D
+\item \textbf{J → E:} Distancia: 33, Ruta: J → D → E
+\item \textbf{J → F:} Distancia: 31, Ruta: J → C → F
+\item \textbf{J → G:} Distancia: 27, Ruta: J → C → G
+\item \textbf{J → H:} Distancia: 34, Ruta: J → C → M → H
+\item \textbf{J → I:} Distancia: 36, Ruta: J → D → I
+\item \textbf{J → K:} Distancia: 25, Ruta: J → C → K
+\item \textbf{J → L:} Distancia: 32, Ruta: J → C → F → L
+\item \textbf{J → M:} Distancia: 29, Ruta: J → C → M
+\item \textbf{J → N:} Distancia: 29, Ruta: J → C → G → N
+\item \textbf{J → O:} Distancia: 31, Ruta: J → C → K → B → O
+\item \textbf{J → P:} Distancia: 34, Ruta: J → C → K → B → P
+\item \textbf{K → A:} Distancia: 7, Ruta: K → C → G → A
+\item \textbf{K → B:} Distancia: 1, Ruta: K → B
+\item \textbf{K → C:} Distancia: 1, Ruta: K → C
+\item \textbf{K → D:} Distancia: 6, Ruta: K → C → D
+\item \textbf{K → E:} Distancia: 12, Ruta: K → C → D → E
+\item \textbf{K → F:} Distancia: 10, Ruta: K → C → F
+\item \textbf{K → G:} Distancia: 6, Ruta: K → C → G
+\item \textbf{K → H:} Distancia: 13, Ruta: K → C → M → H
+\item \textbf{K → I:} Distancia: 15, Ruta: K → C → D → I
+\item \textbf{K → J:} Distancia: 10, Ruta: K → C → J
+\item \textbf{K → L:} Distancia: 11, Ruta: K → C → F → L
+\item \textbf{K → M:} Distancia: 8, Ruta: K → C → M
+\item \textbf{K → N:} Distancia: 8, Ruta: K → C → G → N
+\item \textbf{K → O:} Distancia: 6, Ruta: K → B → O
+\item \textbf{K → P:} Distancia: 9, Ruta: K → B → P
+\item \textbf{L → A:} Distancia: 1, Ruta: L → E → A
+\item \textbf{L → B:} Distancia: 4, Ruta: L → B
+\item \textbf{L → C:} Distancia: 7, Ruta: L → G → N → K → C
+\item \textbf{L → D:} Distancia: 12, Ruta: L → G → N → K → C → D
+\item \textbf{L → E:} Distancia: 1, Ruta: L → E
+\item \textbf{L → F:} Distancia: 12, Ruta: L → E → F
+\item \textbf{L → G:} Distancia: 1, Ruta: L → G
+\item \textbf{L → H:} Distancia: 18, Ruta: L → B → O → H
+\item \textbf{L → I:} Distancia: 18, Ruta: L → G → N → I
+\item \textbf{L → J:} Distancia: 10, Ruta: L → E → J
+\item \textbf{L → K:} Distancia: 6, Ruta: L → G → N → K
+\item \textbf{L → M:} Distancia: 14, Ruta: L → G → N → K → C → M
+\item \textbf{L → N:} Distancia: 3, Ruta: L → G → N
+\item \textbf{L → O:} Distancia: 9, Ruta: L → B → O
+\item \textbf{L → P:} Distancia: 12, Ruta: L → B → P
+\item \textbf{M → A:} Distancia: 4, Ruta: M → A
+\item \textbf{M → B:} Distancia: 7, Ruta: M → B
+\item \textbf{M → C:} Distancia: 10, Ruta: M → G → N → K → C
+\item \textbf{M → D:} Distancia: 15, Ruta: M → G → N → K → C → D
+\item \textbf{M → E:} Distancia: 19, Ruta: M → B → P → F → L → E
+\item \textbf{M → F:} Distancia: 17, Ruta: M → B → P → F
+\item \textbf{M → G:} Distancia: 4, Ruta: M → G
+\item \textbf{M → H:} Distancia: 5, Ruta: M → H
+\item \textbf{M → I:} Distancia: 9, Ruta: M → I
+\item \textbf{M → J:} Distancia: 19, Ruta: M → A → J
+\item \textbf{M → K:} Distancia: 9, Ruta: M → G → N → K
+\item \textbf{M → L:} Distancia: 18, Ruta: M → B → P → F → L
+\item \textbf{M → N:} Distancia: 6, Ruta: M → G → N
+\item \textbf{M → O:} Distancia: 12, Ruta: M → B → O
+\item \textbf{M → P:} Distancia: 15, Ruta: M → B → P
+\item \textbf{N → A:} Distancia: 10, Ruta: N → K → C → G → A
+\item \textbf{N → B:} Distancia: 4, Ruta: N → K → B
+\item \textbf{N → C:} Distancia: 4, Ruta: N → K → C
+\item \textbf{N → D:} Distancia: 9, Ruta: N → K → C → D
+\item \textbf{N → E:} Distancia: 15, Ruta: N → K → C → D → E
+\item \textbf{N → F:} Distancia: 13, Ruta: N → K → C → F
+\item \textbf{N → G:} Distancia: 9, Ruta: N → K → C → G
+\item \textbf{N → H:} Distancia: 16, Ruta: N → K → C → M → H
+\item \textbf{N → I:} Distancia: 15, Ruta: N → I
+\item \textbf{N → J:} Distancia: 13, Ruta: N → K → C → J
+\item \textbf{N → K:} Distancia: 3, Ruta: N → K
+\item \textbf{N → L:} Distancia: 14, Ruta: N → K → C → F → L
+\item \textbf{N → M:} Distancia: 11, Ruta: N → K → C → M
+\item \textbf{N → O:} Distancia: 9, Ruta: N → K → B → O
+\item \textbf{N → P:} Distancia: 12, Ruta: N → K → B → P
+\item \textbf{O → A:} Distancia: 5, Ruta: O → A
+\item \textbf{O → B:} Distancia: 6, Ruta: O → N → K → B
+\item \textbf{O → C:} Distancia: 6, Ruta: O → N → K → C
+\item \textbf{O → D:} Distancia: 11, Ruta: O → N → K → C → D
+\item \textbf{O → E:} Distancia: 17, Ruta: O → N → K → C → D → E
+\item \textbf{O → F:} Distancia: 15, Ruta: O → N → K → C → F
+\item \textbf{O → G:} Distancia: 11, Ruta: O → N → K → C → G
+\item \textbf{O → H:} Distancia: 9, Ruta: O → H
+\item \textbf{O → I:} Distancia: 17, Ruta: O → N → I
+\item \textbf{O → J:} Distancia: 15, Ruta: O → N → K → C → J
+\item \textbf{O → K:} Distancia: 5, Ruta: O → N → K
+\item \textbf{O → L:} Distancia: 16, Ruta: O → N → K → C → F → L
+\item \textbf{O → M:} Distancia: 13, Ruta: O → N → K → C → M
+\item \textbf{O → N:} Distancia: 2, Ruta: O → N
+\item \textbf{O → P:} Distancia: 14, Ruta: O → N → K → B → P
+\item \textbf{P → A:} Distancia: 4, Ruta: P → A
+\item \textbf{P → B:} Distancia: 4, Ruta: P → N → K → B
+\item \textbf{P → C:} Distancia: 4, Ruta: P → N → K → C
+\item \textbf{P → D:} Distancia: 0, Ruta: P → D
+\item \textbf{P → E:} Distancia: 4, Ruta: P → F → L → E
+\item \textbf{P → F:} Distancia: 2, Ruta: P → F
+\item \textbf{P → G:} Distancia: 3, Ruta: P → G
+\item \textbf{P → H:} Distancia: 8, Ruta: P → M → H
+\item \textbf{P → I:} Distancia: 9, Ruta: P → D → I
+\item \textbf{P → J:} Distancia: 13, Ruta: P → F → L → E → J
+\item \textbf{P → K:} Distancia: 3, Ruta: P → N → K
+\item \textbf{P → L:} Distancia: 3, Ruta: P → F → L
+\item \textbf{P → M:} Distancia: 3, Ruta: P → M
+\item \textbf{P → N:} Distancia: 0, Ruta: P → N
+\item \textbf{P → O:} Distancia: 9, Ruta: P → O
+\end{itemize}
+\end{document}

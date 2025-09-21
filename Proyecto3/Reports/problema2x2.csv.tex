@@ -1,0 +1,172 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{booktabs}
+\usepackage{colortbl}
+\usepackage{caption}
+\usepackage{multirow}
+\geometry{margin=1in}
+
+\usepackage{float}
+\definecolor{lightblue}{RGB}{200,230,255}
+\definecolor{lightgreen}{RGB}{220,255,220}
+\definecolor{lightred}{RGB}{255,220,220}
+\definecolor{lightyellow}{RGB}{255,255,200}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Algoritmo de Floyd - Solución}
+\fancyhead[R]{\thepage\ de \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{Proyecto 1: Rutas Optimas (Algoritmo de Floyd)}
+\author{Emily Sanchez \\ Viviana Vargas \\[1cm] Curso: Investigación de Operaciones \\ II Semestre 2025}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+\newpage
+\setcounter{page}{1}
+
+\section{Introducción}
+El algoritmo de Floyd-Warshall es un algoritmo para encontrar los caminos más cortos en un grafo ponderado. Fue publicado por Robert Floyd en 1962.\\
+El algoritmo de Floyd se basa en el principio de la Programación Dinámica.\\
+El algoritmo comienza con una tabla llamada G(0) que muestra las distancias directas entre cada nodo. Si dos nodos no están conectados directamente, la tabla marca esa distancia como infinito. Luego verifica si pasar por un nodo intermedio puede hacer que el camino entre dos nodos sea más corto.\\
+El proceso se repite hasta que todos los nodos intermedios posibles hayan sido probados (es decir, habrá una tabla G(k) para cada nodo k). Al final, la tabla P muestra la distancia más corta posible entre cada par de nodos.\\
+Podemos visualizar estos problemas con distancias entre ciudades: ¿qué pasa si quiero ir directamente de la ciudad A a la ciudad C? ¿Sería más corto ir directamente de A a C o ir de A a B y de B a C?\\
+\textbf{Complejidad espacial:} $O(n^2)$\\
+\textbf{Complejidad temporal:} $O(n^3)$\\
+\clearpage
+\section{Descripción del Problema}
+Grafo con 2 nodos:
+
+\begin{itemize}
+\item Nodo A: A
+\item Nodo B: B
+\end{itemize}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.5\textwidth,keepaspectratio]{grafo.png}
+\caption{Representación del grafo original}
+\end{figure}
+
+\clearpage
+\section{Procedimiento del Algoritmo}
+\subsection{Matriz de Distancias Inicial D(0)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+ & A & B \\\hline
+A & 0 & 51 \\\hline
+B & 6 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias inicial D(0)}
+\end{table}
+
+\clearpage
+\subsection{Matriz de Caminos Inicial P(0)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+ & A & B \\\hline
+A & - & A \\\hline
+B & B & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos inicial P(0)}
+\end{table}
+
+\clearpage
+\subsection{Iteraciones del Algoritmo}
+\subsubsection{Iteración 1 (k = 1) - Nodo intermedio: A}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+ & A & B \\\hline
+A & 0 & 51 \\\hline
+B & 6 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(1) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+ & A & B \\\hline
+A & - & A \\\hline
+B & B & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(1) - Cambios resaltados en azul}
+\end{table}
+
+\subsubsection{Iteración 2 (k = 2) - Nodo intermedio: B}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+ & A & B \\\hline
+A & 0 & 51 \\\hline
+B & 6 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(2) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+ & A & B \\\hline
+A & - & A \\\hline
+B & B & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(2) - Cambios resaltados en azul}
+\end{table}
+
+\clearpage
+\section{Resultados Finales}
+\subsection{Matriz de Distancias Final D(2)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+ & A & B \\\hline
+A & 0 & 51 \\\hline
+B & 6 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias final D(2)}
+\end{table}
+
+\clearpage
+\subsection{Matriz de Caminos Final P(2)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+ & A & B \\\hline
+A & - & A \\\hline
+B & B & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos final P(2)}
+\end{table}
+
+\clearpage
+\subsection{Rutas Óptimas}
+\begin{itemize}
+\item \textbf{A → B:} Distancia: 51, Ruta: A → B
+\item \textbf{B → A:} Distancia: 6, Ruta: B → A
+\end{itemize}
+\end{document}

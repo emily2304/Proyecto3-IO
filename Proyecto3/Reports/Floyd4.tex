@@ -1,0 +1,332 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{booktabs}
+\usepackage{colortbl}
+\usepackage{caption}
+\usepackage{multirow}
+\geometry{margin=1in}
+
+\usepackage{float}
+\definecolor{lightblue}{RGB}{200,230,255}
+\definecolor{lightgreen}{RGB}{220,255,220}
+\definecolor{lightred}{RGB}{255,220,220}
+\definecolor{lightyellow}{RGB}{255,255,200}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Algoritmo de Floyd - Solución}
+\fancyhead[R]{\thepage\ de \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{Proyecto 1: Rutas Optimas (Algoritmo de Floyd)}
+\author{Emily Sanchez \\ Viviana Vargas \\[1cm] Curso: Investigación de Operaciones \\ II Semestre 2025}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+\newpage
+\setcounter{page}{1}
+
+\section{Introducción}
+El algoritmo de Floyd-Warshall es un algoritmo para encontrar los caminos más cortos en un grafo ponderado. Fue publicado por Robert Floyd en 1962.\\
+El algoritmo de Floyd se basa en el principio de la Programación Dinámica .\\
+\textbf{Complejidad espacial:} $O(n^2)$\\
+\textbf{Complejidad temporal:} $O(n^3)$\\
+\clearpage
+\section{Descripción del Problema}
+Grafo con 8 nodos:
+
+\begin{itemize}
+\item Nodo A: A
+\item Nodo B: B
+\item Nodo C: C
+\item Nodo D: D
+\item Nodo E: E
+\item Nodo F: F
+\item Nodo G: G
+\item Nodo H: H
+\end{itemize}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.5\textwidth,keepaspectratio]{grafo.png}
+\caption{Representación del grafo original}
+\end{figure}
+
+\clearpage
+\section{Procedimiento del Algoritmo}
+\subsection{Matriz de Distancias Inicial D(0)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H \\\hline
+A & 0 & $\infty$ & 3 & 4 & 6 & 7 & 1 & $\infty$ \\\hline
+B & 9 & 0 & $\infty$ & $\infty$ & 12 & 12 & $\infty$ & 12 \\\hline
+C & $\infty$ & 4 & 0 & $\infty$ & 11 & 4 & 18 & $\infty$ \\\hline
+D & 3 & 12 & 5 & 0 & 1 & $\infty$ & 4 & 2 \\\hline
+E & $\infty$ & 14 & 12 & 5 & 0 & 12 & $\infty$ & 1 \\\hline
+F & 12 & $\infty$ & $\infty$ & $\infty$ & 2 & 0 & $\infty$ & 19 \\\hline
+G & 1 & $\infty$ & 10 & 7 & $\infty$ & 10 & 0 & 9 \\\hline
+H & 13 & 2 & 9 & 9 & 4 & 16 & 20 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias inicial D(0)}
+\end{table}
+
+\clearpage
+\subsection{Matriz de Caminos Inicial P(0)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H \\\hline
+A & - & - & A & A & A & A & A & - \\\hline
+B & B & - & - & - & B & B & - & B \\\hline
+C & - & C & - & - & C & C & C & - \\\hline
+D & D & D & D & - & D & - & D & D \\\hline
+E & - & E & E & E & - & E & - & E \\\hline
+F & F & - & - & - & F & - & - & F \\\hline
+G & G & - & G & G & - & G & - & G \\\hline
+H & H & H & H & H & H & H & H & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos inicial P(0)}
+\end{table}
+
+\clearpage
+\subsection{Iteraciones del Algoritmo}
+\subsubsection{Iteración 1 (k = 1) - Nodo intermedio: A}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H \\\hline
+A & 0 & $\infty$ & 3 & 4 & 6 & 7 & 1 & $\infty$ \\\hline
+B & 9 & 0 & \cellcolor{lightgreen} 12 & \cellcolor{lightgreen} 13 & 12 & 12 & \cellcolor{lightgreen} 10 & 12 \\\hline
+C & $\infty$ & 4 & 0 & $\infty$ & 11 & 4 & 18 & $\infty$ \\\hline
+D & 3 & 12 & 5 & 0 & 1 & \cellcolor{lightgreen} 10 & 4 & 2 \\\hline
+E & $\infty$ & 14 & 12 & 5 & 0 & 12 & $\infty$ & 1 \\\hline
+F & 12 & $\infty$ & \cellcolor{lightgreen} 15 & \cellcolor{lightgreen} 16 & 2 & 0 & \cellcolor{lightgreen} 13 & 19 \\\hline
+G & 1 & $\infty$ & \cellcolor{lightgreen} 4 & \cellcolor{lightgreen} 5 & \cellcolor{lightgreen} 7 & \cellcolor{lightgreen} 8 & 0 & 9 \\\hline
+H & 13 & 2 & 9 & 9 & 4 & 16 & \cellcolor{lightgreen} 14 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(1) - Cambios resaltados en celeste}
+\end{table}
+
+\subsubsection{Iteración 2 (k = 2) - Nodo intermedio: B}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H \\\hline
+A & 0 & $\infty$ & 3 & 4 & 6 & 7 & 1 & $\infty$ \\\hline
+B & 9 & 0 & 12 & 13 & 12 & 12 & 10 & 12 \\\hline
+C & \cellcolor{lightgreen} 13 & 4 & 0 & \cellcolor{lightgreen} 17 & 11 & 4 & \cellcolor{lightgreen} 14 & \cellcolor{lightgreen} 16 \\\hline
+D & 3 & 12 & 5 & 0 & 1 & 10 & 4 & 2 \\\hline
+E & \cellcolor{lightgreen} 23 & 14 & 12 & 5 & 0 & 12 & \cellcolor{lightgreen} 24 & 1 \\\hline
+F & 12 & $\infty$ & 15 & 16 & 2 & 0 & 13 & 19 \\\hline
+G & 1 & $\infty$ & 4 & 5 & 7 & 8 & 0 & 9 \\\hline
+H & \cellcolor{lightgreen} 11 & 2 & 9 & 9 & 4 & \cellcolor{lightgreen} 14 & \cellcolor{lightgreen} 12 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(2) - Cambios resaltados en celeste}
+\end{table}
+
+\subsubsection{Iteración 3 (k = 3) - Nodo intermedio: C}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H \\\hline
+A & 0 & \cellcolor{lightgreen} 7 & 3 & 4 & 6 & 7 & 1 & \cellcolor{lightgreen} 19 \\\hline
+B & 9 & 0 & 12 & 13 & 12 & 12 & 10 & 12 \\\hline
+C & 13 & 4 & 0 & 17 & 11 & 4 & 14 & 16 \\\hline
+D & 3 & \cellcolor{lightgreen} 9 & 5 & 0 & 1 & \cellcolor{lightgreen} 9 & 4 & 2 \\\hline
+E & 23 & 14 & 12 & 5 & 0 & 12 & 24 & 1 \\\hline
+F & 12 & \cellcolor{lightgreen} 19 & 15 & 16 & 2 & 0 & 13 & 19 \\\hline
+G & 1 & \cellcolor{lightgreen} 8 & 4 & 5 & 7 & 8 & 0 & 9 \\\hline
+H & 11 & 2 & 9 & 9 & 4 & \cellcolor{lightgreen} 13 & 12 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(3) - Cambios resaltados en celeste}
+\end{table}
+
+\subsubsection{Iteración 4 (k = 4) - Nodo intermedio: D}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H \\\hline
+A & 0 & 7 & 3 & 4 & \cellcolor{lightgreen} 5 & 7 & 1 & \cellcolor{lightgreen} 6 \\\hline
+B & 9 & 0 & 12 & 13 & 12 & 12 & 10 & 12 \\\hline
+C & 13 & 4 & 0 & 17 & 11 & 4 & 14 & 16 \\\hline
+D & 3 & 9 & 5 & 0 & 1 & 9 & 4 & 2 \\\hline
+E & \cellcolor{lightgreen} 8 & 14 & \cellcolor{lightgreen} 10 & 5 & 0 & 12 & \cellcolor{lightgreen} 9 & 1 \\\hline
+F & 12 & 19 & 15 & 16 & 2 & 0 & 13 & \cellcolor{lightgreen} 18 \\\hline
+G & 1 & 8 & 4 & 5 & \cellcolor{lightgreen} 6 & 8 & 0 & \cellcolor{lightgreen} 7 \\\hline
+H & 11 & 2 & 9 & 9 & 4 & 13 & 12 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(4) - Cambios resaltados en celeste}
+\end{table}
+
+\subsubsection{Iteración 5 (k = 5) - Nodo intermedio: E}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H \\\hline
+A & 0 & 7 & 3 & 4 & 5 & 7 & 1 & 6 \\\hline
+B & 9 & 0 & 12 & 13 & 12 & 12 & 10 & 12 \\\hline
+C & 13 & 4 & 0 & \cellcolor{lightgreen} 16 & 11 & 4 & 14 & \cellcolor{lightgreen} 12 \\\hline
+D & 3 & 9 & 5 & 0 & 1 & 9 & 4 & 2 \\\hline
+E & 8 & 14 & 10 & 5 & 0 & 12 & 9 & 1 \\\hline
+F & \cellcolor{lightgreen} 10 & \cellcolor{lightgreen} 16 & \cellcolor{lightgreen} 12 & \cellcolor{lightgreen} 7 & 2 & 0 & \cellcolor{lightgreen} 11 & \cellcolor{lightgreen} 3 \\\hline
+G & 1 & 8 & 4 & 5 & 6 & 8 & 0 & 7 \\\hline
+H & 11 & 2 & 9 & 9 & 4 & 13 & 12 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(5) - Cambios resaltados en celeste}
+\end{table}
+
+\subsubsection{Iteración 6 (k = 6) - Nodo intermedio: F}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H \\\hline
+A & 0 & 7 & 3 & 4 & 5 & 7 & 1 & 6 \\\hline
+B & 9 & 0 & 12 & 13 & 12 & 12 & 10 & 12 \\\hline
+C & 13 & 4 & 0 & \cellcolor{lightgreen} 11 & \cellcolor{lightgreen} 6 & 4 & 14 & \cellcolor{lightgreen} 7 \\\hline
+D & 3 & 9 & 5 & 0 & 1 & 9 & 4 & 2 \\\hline
+E & 8 & 14 & 10 & 5 & 0 & 12 & 9 & 1 \\\hline
+F & 10 & 16 & 12 & 7 & 2 & 0 & 11 & 3 \\\hline
+G & 1 & 8 & 4 & 5 & 6 & 8 & 0 & 7 \\\hline
+H & 11 & 2 & 9 & 9 & 4 & 13 & 12 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(6) - Cambios resaltados en celeste}
+\end{table}
+
+\subsubsection{Iteración 7 (k = 7) - Nodo intermedio: G}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H \\\hline
+A & 0 & 7 & 3 & 4 & 5 & 7 & 1 & 6 \\\hline
+B & 9 & 0 & 12 & 13 & 12 & 12 & 10 & 12 \\\hline
+C & 13 & 4 & 0 & 11 & 6 & 4 & 14 & 7 \\\hline
+D & 3 & 9 & 5 & 0 & 1 & 9 & 4 & 2 \\\hline
+E & 8 & 14 & 10 & 5 & 0 & 12 & 9 & 1 \\\hline
+F & 10 & 16 & 12 & 7 & 2 & 0 & 11 & 3 \\\hline
+G & 1 & 8 & 4 & 5 & 6 & 8 & 0 & 7 \\\hline
+H & 11 & 2 & 9 & 9 & 4 & 13 & 12 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(7) - Cambios resaltados en celeste}
+\end{table}
+
+\subsubsection{Iteración 8 (k = 8) - Nodo intermedio: H}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H \\\hline
+A & 0 & 7 & 3 & 4 & 5 & 7 & 1 & 6 \\\hline
+B & 9 & 0 & 12 & 13 & 12 & 12 & 10 & 12 \\\hline
+C & 13 & 4 & 0 & 11 & 6 & 4 & 14 & 7 \\\hline
+D & 3 & \cellcolor{lightgreen} 4 & 5 & 0 & 1 & 9 & 4 & 2 \\\hline
+E & 8 & \cellcolor{lightgreen} 3 & 10 & 5 & 0 & 12 & 9 & 1 \\\hline
+F & 10 & \cellcolor{lightgreen} 5 & 12 & 7 & 2 & 0 & 11 & 3 \\\hline
+G & 1 & 8 & 4 & 5 & 6 & 8 & 0 & 7 \\\hline
+H & 11 & 2 & 9 & 9 & 4 & 13 & 12 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(8) - Cambios resaltados en celeste}
+\end{table}
+
+\clearpage
+\section{Resultados Finales}
+\subsection{Matriz de Distancias Final D(8)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+ & A & B & C & D & E & F & G & H \\\hline
+A & 0 & 7 & 3 & 4 & 5 & 7 & 1 & 6 \\\hline
+B & 9 & 0 & 12 & 13 & 12 & 12 & 10 & 12 \\\hline
+C & 13 & 4 & 0 & 11 & 6 & 4 & 14 & 7 \\\hline
+D & 3 & 4 & 5 & 0 & 1 & 9 & 4 & 2 \\\hline
+E & 8 & 3 & 10 & 5 & 0 & 12 & 9 & 1 \\\hline
+F & 10 & 5 & 12 & 7 & 2 & 0 & 11 & 3 \\\hline
+G & 1 & 8 & 4 & 5 & 6 & 8 & 0 & 7 \\\hline
+H & 11 & 2 & 9 & 9 & 4 & 13 & 12 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias final D(8)}
+\end{table}
+
+\clearpage
+\subsection{Rutas Óptimas}
+\begin{itemize}
+\item \textbf{A → B:} Distancia: 7, Ruta: A → C → B
+\item \textbf{A → C:} Distancia: 3, Ruta: A → C
+\item \textbf{A → D:} Distancia: 4, Ruta: A → D
+\item \textbf{A → E:} Distancia: 5, Ruta: A → D → E
+\item \textbf{A → F:} Distancia: 7, Ruta: A → F
+\item \textbf{A → G:} Distancia: 1, Ruta: A → G
+\item \textbf{A → H:} Distancia: 6, Ruta: A → D → H
+\item \textbf{B → A:} Distancia: 9, Ruta: B → A
+\item \textbf{B → C:} Distancia: 12, Ruta: B → A → C
+\item \textbf{B → D:} Distancia: 13, Ruta: B → A → D
+\item \textbf{B → E:} Distancia: 12, Ruta: B → E
+\item \textbf{B → F:} Distancia: 12, Ruta: B → F
+\item \textbf{B → G:} Distancia: 10, Ruta: B → A → G
+\item \textbf{B → H:} Distancia: 12, Ruta: B → H
+\item \textbf{C → A:} Distancia: 13, Ruta: C → B → A
+\item \textbf{C → B:} Distancia: 4, Ruta: C → B
+\item \textbf{C → D:} Distancia: 11, Ruta: C → F → E → D
+\item \textbf{C → E:} Distancia: 6, Ruta: C → F → E
+\item \textbf{C → F:} Distancia: 4, Ruta: C → F
+\item \textbf{C → G:} Distancia: 14, Ruta: C → B → A → G
+\item \textbf{C → H:} Distancia: 7, Ruta: C → F → E → H
+\item \textbf{D → A:} Distancia: 3, Ruta: D → A
+\item \textbf{D → B:} Distancia: 4, Ruta: D → H → B
+\item \textbf{D → C:} Distancia: 5, Ruta: D → C
+\item \textbf{D → E:} Distancia: 1, Ruta: D → E
+\item \textbf{D → F:} Distancia: 9, Ruta: D → C → F
+\item \textbf{D → G:} Distancia: 4, Ruta: D → G
+\item \textbf{D → H:} Distancia: 2, Ruta: D → H
+\item \textbf{E → A:} Distancia: 8, Ruta: E → D → A
+\item \textbf{E → B:} Distancia: 3, Ruta: E → H → B
+\item \textbf{E → C:} Distancia: 10, Ruta: E → D → C
+\item \textbf{E → D:} Distancia: 5, Ruta: E → D
+\item \textbf{E → F:} Distancia: 12, Ruta: E → F
+\item \textbf{E → G:} Distancia: 9, Ruta: E → D → G
+\item \textbf{E → H:} Distancia: 1, Ruta: E → H
+\item \textbf{F → A:} Distancia: 10, Ruta: F → E → D → A
+\item \textbf{F → B:} Distancia: 5, Ruta: F → E → H → B
+\item \textbf{F → C:} Distancia: 12, Ruta: F → E → D → C
+\item \textbf{F → D:} Distancia: 7, Ruta: F → E → D
+\item \textbf{F → E:} Distancia: 2, Ruta: F → E
+\item \textbf{F → G:} Distancia: 11, Ruta: F → E → D → G
+\item \textbf{F → H:} Distancia: 3, Ruta: F → E → H
+\item \textbf{G → A:} Distancia: 1, Ruta: G → A
+\item \textbf{G → B:} Distancia: 8, Ruta: G → A → C → B
+\item \textbf{G → C:} Distancia: 4, Ruta: G → A → C
+\item \textbf{G → D:} Distancia: 5, Ruta: G → A → D
+\item \textbf{G → E:} Distancia: 6, Ruta: G → A → D → E
+\item \textbf{G → F:} Distancia: 8, Ruta: G → A → F
+\item \textbf{G → H:} Distancia: 7, Ruta: G → A → D → H
+\item \textbf{H → A:} Distancia: 11, Ruta: H → B → A
+\item \textbf{H → B:} Distancia: 2, Ruta: H → B
+\item \textbf{H → C:} Distancia: 9, Ruta: H → C
+\item \textbf{H → D:} Distancia: 9, Ruta: H → D
+\item \textbf{H → E:} Distancia: 4, Ruta: H → E
+\item \textbf{H → F:} Distancia: 13, Ruta: H → C → F
+\item \textbf{H → G:} Distancia: 12, Ruta: H → B → A → G
+\end{itemize}
+\end{document}

@@ -1,0 +1,63 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{geometry}
+\usepackage{multirow}
+\usepackage{graphicx}
+\geometry{margin=1in}
+\definecolor{verde}{RGB}{0, 128, 0}
+\definecolor{rojo}{RGB}{255, 0, 0}
+\title{Problema de la Mochila - Solución}
+\author{Grupo de Trabajo}
+\date{\today}
+\begin{document}
+\maketitle
+
+\section*{Problema de la Mochila}
+El problema de la mochila consiste en seleccionar un conjunto de objetos de tal manera que se maximice el valor total sin exceder la capacidad máxima.\\
+
+\textbf{Tipo de problema:} 0/1 Knapsack\\
+\textbf{Capacidad máxima:} 15\\
+\textbf{Número de objetos:} 7\\
+
+\section*{Datos del Problema}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Objeto & Costo & Valor & Cantidad \\
+\hline
+A & 3,00 & 7,00 & 1 \\
+B & 4,00 & 9,00 & 1 \\
+C & 2,00 & 5,00 & 1 \\
+D & 6,00 & 12,00 & 1 \\
+E & 7,00 & 14,00 & 1 \\
+F & 3,00 & 6,00 & 1 \\
+G & 5,00 & 12,00 & 1 \\
+\hline
+\end{tabular}
+
+\section*{Tabla de Programación Dinámica}
+\begin{center}
+\scriptsize
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+\multirow{2}{*}{Obj/W} & \multicolumn{1}{c|}{0} & \multicolumn{1}{c|}{1} & \multicolumn{1}{c|}{2} & \multicolumn{1}{c|}{3} & \multicolumn{1}{c|}{4} & \multicolumn{1}{c|}{5} & \multicolumn{1}{c|}{6} & \multicolumn{1}{c|}{7} & \multicolumn{1}{c|}{8} & \multicolumn{1}{c|}{9} & \multicolumn{1}{c|}{10} & \multicolumn{1}{c|}{11} & \multicolumn{1}{c|}{12} & \multicolumn{1}{c|}{13} & \multicolumn{1}{c|}{14} & \multicolumn{1}{c|}{15} \\ \cline{2-17}
+& \multicolumn{16}{c|}{Capacidad} \\ \hline
+0 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} \\ \hline
+A & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{7} & \cellcolor{verde}\textcolor{white}{7} & \cellcolor{verde}\textcolor{white}{7} & \cellcolor{verde}\textcolor{white}{7} & \cellcolor{verde}\textcolor{white}{7} & \cellcolor{verde}\textcolor{white}{7} & \cellcolor{verde}\textcolor{white}{7} & \cellcolor{verde}\textcolor{white}{7} & \cellcolor{verde}\textcolor{white}{7} & \cellcolor{verde}\textcolor{white}{7} & \cellcolor{verde}\textcolor{white}{7} & \cellcolor{verde}\textcolor{white}{7} & \cellcolor{verde}\textcolor{white}{7} \\ \hline
+B & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{7} & \cellcolor{verde}\textcolor{white}{9} & \cellcolor{verde}\textcolor{white}{9} & \cellcolor{verde}\textcolor{white}{9} & \cellcolor{verde}\textcolor{white}{16} & \cellcolor{verde}\textcolor{white}{16} & \cellcolor{verde}\textcolor{white}{16} & \cellcolor{verde}\textcolor{white}{16} & \cellcolor{verde}\textcolor{white}{16} & \cellcolor{verde}\textcolor{white}{16} & \cellcolor{verde}\textcolor{white}{16} & \cellcolor{verde}\textcolor{white}{16} & \cellcolor{verde}\textcolor{white}{16} \\ \hline
+C & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{5} & \cellcolor{rojo}\textcolor{white}{7} & \cellcolor{rojo}\textcolor{white}{9} & \cellcolor{verde}\textcolor{white}{12} & \cellcolor{verde}\textcolor{white}{14} & \cellcolor{rojo}\textcolor{white}{16} & \cellcolor{rojo}\textcolor{white}{16} & \cellcolor{verde}\textcolor{white}{21} & \cellcolor{verde}\textcolor{white}{21} & \cellcolor{verde}\textcolor{white}{21} & \cellcolor{verde}\textcolor{white}{21} & \cellcolor{verde}\textcolor{white}{21} & \cellcolor{verde}\textcolor{white}{21} & \cellcolor{verde}\textcolor{white}{21} \\ \hline
+D & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{5} & \cellcolor{rojo}\textcolor{white}{7} & \cellcolor{rojo}\textcolor{white}{9} & \cellcolor{rojo}\textcolor{white}{12} & \cellcolor{rojo}\textcolor{white}{14} & \cellcolor{rojo}\textcolor{white}{16} & \cellcolor{verde}\textcolor{white}{17} & \cellcolor{rojo}\textcolor{white}{21} & \cellcolor{rojo}\textcolor{white}{21} & \cellcolor{verde}\textcolor{white}{24} & \cellcolor{verde}\textcolor{white}{26} & \cellcolor{verde}\textcolor{white}{28} & \cellcolor{verde}\textcolor{white}{28} & \cellcolor{verde}\textcolor{white}{33} \\ \hline
+E & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{5} & \cellcolor{rojo}\textcolor{white}{7} & \cellcolor{rojo}\textcolor{white}{9} & \cellcolor{rojo}\textcolor{white}{12} & \cellcolor{rojo}\textcolor{white}{14} & \cellcolor{rojo}\textcolor{white}{16} & \cellcolor{rojo}\textcolor{white}{17} & \cellcolor{rojo}\textcolor{white}{21} & \cellcolor{rojo}\textcolor{white}{21} & \cellcolor{rojo}\textcolor{white}{24} & \cellcolor{rojo}\textcolor{white}{26} & \cellcolor{rojo}\textcolor{white}{28} & \cellcolor{verde}\textcolor{white}{30} & \cellcolor{rojo}\textcolor{white}{33} \\ \hline
+F & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{5} & \cellcolor{rojo}\textcolor{white}{7} & \cellcolor{rojo}\textcolor{white}{9} & \cellcolor{rojo}\textcolor{white}{12} & \cellcolor{rojo}\textcolor{white}{14} & \cellcolor{rojo}\textcolor{white}{16} & \cellcolor{verde}\textcolor{white}{18} & \cellcolor{rojo}\textcolor{white}{21} & \cellcolor{verde}\textcolor{white}{22} & \cellcolor{rojo}\textcolor{white}{24} & \cellcolor{verde}\textcolor{white}{27} & \cellcolor{rojo}\textcolor{white}{28} & \cellcolor{rojo}\textcolor{white}{30} & \cellcolor{rojo}\textcolor{white}{33} \\ \hline
+G & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{5} & \cellcolor{rojo}\textcolor{white}{7} & \cellcolor{rojo}\textcolor{white}{9} & \cellcolor{rojo}\textcolor{white}{12} & \cellcolor{rojo}\textcolor{white}{14} & \cellcolor{verde}\textcolor{white}{17} & \cellcolor{verde}\textcolor{white}{19} & \cellcolor{rojo}\textcolor{white}{21} & \cellcolor{verde}\textcolor{white}{24} & \cellcolor{verde}\textcolor{white}{26} & \cellcolor{verde}\textcolor{white}{28} & \cellcolor{verde}\textcolor{white}{30} & \cellcolor{verde}\textcolor{white}{33} & \cellcolor{verde}\textcolor{white}{34} \\ \hline
+\end{tabular}
+\end{center}
+\normalsize
+
+\section*{Solución Óptima}
+\textbf{Valor máximo obtenido:} 34\\
+\textbf{Objetos seleccionados:} G, F, B, A\\
+\textbf{Capacidad utilizada:} 15\\
+\end{document}

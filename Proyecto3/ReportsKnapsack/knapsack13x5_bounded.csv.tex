@@ -1,0 +1,106 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{geometry}
+\usepackage{multirow}
+\usepackage{graphicx}
+\geometry{margin=1in}
+\definecolor{verde}{RGB}{0, 128, 0}
+\definecolor{rojo}{RGB}{255, 0, 0}
+\title{Proyecto 2: El Problema de la Mochila}
+\author{Emily Sanchez \\ Viviana Vargas \\[1cm] Curso: Investigación de Operaciones \\ II Semestre 2025}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\thispagestyle{empty}
+\newpage
+\setcounter{page}{1}
+
+\section{Problema de la Mochila (Knapsack Problem)}
+
+El \textbf{problema de la mochila} es un clasico de la \textit{optimizacion combinatoria}. Se dispone de una \textbf{mochila} con una \textbf{capacidad maxima} $W$ y un conjunto de $n$ objetos. Cada objeto $i$ tiene un \textbf{peso} $w_i$ y un \textbf{valor} $v_i$. El objetivo es seleccionar los objetos de manera que:
+\begin{itemize}
+  \item La suma total de los pesos no exceda la capacidad $W$.
+  \item Se maximice el valor total de los objetos elegidos.
+\end{itemize}
+
+\subsection{Variantes principales}
+\begin{description}
+  \item[0/1 Knapsack] Cada objeto puede elegirse una sola vez o no elegirse: decision binaria.
+  \item[Bounded Knapsack] Cada objeto puede seleccionarse un numero limitado de veces.
+  \item[Unbounded Knapsack] Se permite una cantidad ilimitada de cada objeto.
+\end{description}
+
+\subsection{Solucion}
+\paragraph{0/1 Knapsack} Se resuelve comunmente con \textbf{programacion dinamica}. Sea $dp[i][w]$ el valor maximo al considerar los primeros $i$ objetos y capacidad $w$.
+\[
+dp[i][w] =
+\begin{cases}
+dp[i-1][w] & \text{si } w_i > w, \\
+\max ( dp[i-1][w], v_i + dp[i-1][w - w_i] ) & \text{si } w_i \le w.
+\end{cases}
+\]
+
+\paragraph{Bounded Knapsack} Similar al 0/1 pero puede tener uno o más cantidades por objeto. Es limitado, por lo que no puede ser infinito.
+\[
+dp[i][w] = 
+\max_{0 \leq k \leq c_i,\; k\,w_i \leq w} \left( dp[i-1][w - k w_i] + k v_i \right).
+\]
+
+\paragraph{Unbounded Knapsack} Similar al bounded pero permitiendo repeticiones sin limite de cantidades (infinito).
+\[
+dp[w] = \max ( dp[w], v_i + dp[w - w_i] ).
+\]
+
+\thispagestyle{empty}
+\newpage
+\textbf{Tipo de problema:} Bounded Knapsack\\
+\textbf{Capacidad máxima:} 13\\
+\textbf{Número de objetos:} 5\\
+
+\section*{Datos del Problema}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Objeto & Costo & Valor & Cantidad \\
+\hline
+A & 10,00 & 20,00 & 1 \\
+B & 3,00 & 12,00 & 3 \\
+C & 5,00 & 10,00 & 1 \\
+D & 5,00 & 6,00 & 4 \\
+E & 9,00 & 11,00 & 1 \\
+\hline
+\end{tabular}
+
+\section*{Tabla de Programación Dinámica Detallada}
+\begin{center}
+\scriptsize
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+Capacidad & A & B & C & D & E \\ \hline
+0 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} \\ \hline
+1 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} \\ \hline
+2 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} \\ \hline
+3 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{12(1)} & \cellcolor{rojo}\textcolor{white}{12} & \cellcolor{rojo}\textcolor{white}{12} & \cellcolor{rojo}\textcolor{white}{12} \\ \hline
+4 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{12(1)} & \cellcolor{rojo}\textcolor{white}{12} & \cellcolor{rojo}\textcolor{white}{12} & \cellcolor{rojo}\textcolor{white}{12} \\ \hline
+5 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{12(1)} & \cellcolor{rojo}\textcolor{white}{12} & \cellcolor{rojo}\textcolor{white}{12} & \cellcolor{rojo}\textcolor{white}{12} \\ \hline
+6 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{24(2)} & \cellcolor{rojo}\textcolor{white}{24} & \cellcolor{rojo}\textcolor{white}{24} & \cellcolor{rojo}\textcolor{white}{24} \\ \hline
+7 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{24(2)} & \cellcolor{rojo}\textcolor{white}{24} & \cellcolor{rojo}\textcolor{white}{24} & \cellcolor{rojo}\textcolor{white}{24} \\ \hline
+8 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{24(2)} & \cellcolor{rojo}\textcolor{white}{24} & \cellcolor{rojo}\textcolor{white}{24} & \cellcolor{rojo}\textcolor{white}{24} \\ \hline
+9 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{36(3)} & \cellcolor{rojo}\textcolor{white}{36} & \cellcolor{rojo}\textcolor{white}{36} & \cellcolor{rojo}\textcolor{white}{36} \\ \hline
+10 & \cellcolor{verde}\textcolor{white}{20(1)} & \cellcolor{verde}\textcolor{white}{36(3)} & \cellcolor{rojo}\textcolor{white}{36} & \cellcolor{rojo}\textcolor{white}{36} & \cellcolor{rojo}\textcolor{white}{36} \\ \hline
+11 & \cellcolor{verde}\textcolor{white}{20(1)} & \cellcolor{verde}\textcolor{white}{36(3)} & \cellcolor{rojo}\textcolor{white}{36} & \cellcolor{rojo}\textcolor{white}{36} & \cellcolor{rojo}\textcolor{white}{36} \\ \hline
+12 & \cellcolor{verde}\textcolor{white}{20(1)} & \cellcolor{verde}\textcolor{white}{36(3)} & \cellcolor{rojo}\textcolor{white}{36} & \cellcolor{rojo}\textcolor{white}{36} & \cellcolor{rojo}\textcolor{white}{36} \\ \hline
+13 & \cellcolor{verde}\textcolor{white}{20(1)} & \cellcolor{verde}\textcolor{white}{36(3)} & \cellcolor{rojo}\textcolor{white}{36} & \cellcolor{rojo}\textcolor{white}{36} & \cellcolor{rojo}\textcolor{white}{36} \\ \hline
+\end{tabular}
+\end{center}
+\normalsize
+
+\section*{Solución Óptima}
+\textbf{Valor máximo obtenido:} 36\\
+\textbf{Objetos seleccionados:} B:3\\
+\textbf{Capacidad utilizada:} 9\\
+\end{document}

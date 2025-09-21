@@ -1,0 +1,61 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{geometry}
+\usepackage{multirow}
+\usepackage{graphicx}
+\geometry{margin=1in}
+\definecolor{verde}{RGB}{0, 128, 0}
+\definecolor{rojo}{RGB}{255, 0, 0}
+\title{Proyecto 1: Rutas Optimas (Algoritmo de Floyd)}
+\author{Emily Sanchez \\ Viviana Vargas \\[1cm] Curso: Investigación de Operaciones \\ II Semestre 2025}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\thispagestyle{empty}
+\newpage
+\setcounter{page}{1}
+
+\textbf{Tipo de problema:} 0/1 Knapsack\\
+\textbf{Capacidad máxima:} 8\\
+\textbf{Número de objetos:} 2\\
+
+\clearpage
+\section*{Datos del Problema}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Objeto & Costo & Valor & Cantidad \\
+\hline
+A & 3,00 & 2,00 & 1 \\
+B & 4,00 & 5,00 & 1 \\
+\hline
+\end{tabular}
+
+\section*{Tabla de Programación Dinámica}
+\begin{center}
+\scriptsize
+\begin{tabular}{|c|c|c|c|}
+\hline
+Capacidad/Objetos & Ninguno & A & B \\ \hline
+0 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} \\ \hline
+1 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} \\ \hline
+2 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} \\ \hline
+3 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{2} & \cellcolor{rojo}\textcolor{white}{2} \\ \hline
+4 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{2} & \cellcolor{verde}\textcolor{white}{5} \\ \hline
+5 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{2} & \cellcolor{verde}\textcolor{white}{5} \\ \hline
+6 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{2} & \cellcolor{verde}\textcolor{white}{5} \\ \hline
+7 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{2} & \cellcolor{verde}\textcolor{white}{7} \\ \hline
+8 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{2} & \cellcolor{verde}\textcolor{white}{7} \\ \hline
+\end{tabular}
+\end{center}
+\normalsize
+
+\section*{Solución Óptima}
+\textbf{Valor máximo obtenido:} 7\\
+\textbf{Objetos seleccionados:} B, A\\
+\textbf{Capacidad utilizada:} 7\\
+\end{document}

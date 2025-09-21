@@ -1,0 +1,55 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{geometry}
+\usepackage{multirow}
+\usepackage{graphicx}
+\geometry{margin=1in}
+\definecolor{verde}{RGB}{0, 128, 0}
+\definecolor{rojo}{RGB}{255, 0, 0}
+\title{Problema de la Mochila - Solución}
+\author{Grupo de Trabajo}
+\date{\today}
+\begin{document}
+\maketitle
+
+\section*{Problema de la Mochila}
+El problema de la mochila consiste en seleccionar un conjunto de objetos de tal manera que se maximice el valor total sin exceder la capacidad máxima.\\
+
+\textbf{Tipo de problema:} 0/1 Knapsack\\
+\textbf{Capacidad máxima:} 10\\
+\textbf{Número de objetos:} 3\\
+
+\section*{Datos del Problema}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Objeto & Costo & Valor & Cantidad \\
+\hline
+A & 12,00 & 5,00 & 1 \\
+B & 4,00 & 3,00 & 1 \\
+C & 6,00 & 4,00 & 1 \\
+\hline
+\end{tabular}
+
+\section*{Tabla de Programación Dinámica}
+\begin{center}
+\scriptsize
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+\multirow{2}{*}{Obj/W} & \multicolumn{1}{c|}{0} & \multicolumn{1}{c|}{1} & \multicolumn{1}{c|}{2} & \multicolumn{1}{c|}{3} & \multicolumn{1}{c|}{4} & \multicolumn{1}{c|}{5} & \multicolumn{1}{c|}{6} & \multicolumn{1}{c|}{7} & \multicolumn{1}{c|}{8} & \multicolumn{1}{c|}{9} & \multicolumn{1}{c|}{10} \\ \cline{2-12}
+& \multicolumn{11}{c|}{Capacidad} \\ \hline
+0 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} \\ \hline
+A & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} \\ \hline
+B & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{3} & \cellcolor{verde}\textcolor{white}{3} & \cellcolor{verde}\textcolor{white}{3} & \cellcolor{verde}\textcolor{white}{3} & \cellcolor{verde}\textcolor{white}{3} & \cellcolor{verde}\textcolor{white}{3} & \cellcolor{verde}\textcolor{white}{3} \\ \hline
+C & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{3} & \cellcolor{rojo}\textcolor{white}{3} & \cellcolor{verde}\textcolor{white}{4} & \cellcolor{verde}\textcolor{white}{4} & \cellcolor{verde}\textcolor{white}{4} & \cellcolor{verde}\textcolor{white}{4} & \cellcolor{verde}\textcolor{white}{7} \\ \hline
+\end{tabular}
+\end{center}
+\normalsize
+
+\section*{Solución Óptima}
+\textbf{Valor máximo obtenido:} 7\\
+\textbf{Objetos seleccionados:} C, B\\
+\textbf{Capacidad utilizada:} 10\\
+\end{document}

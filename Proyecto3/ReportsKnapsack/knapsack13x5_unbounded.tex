@@ -1,0 +1,106 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{geometry}
+\usepackage{multirow}
+\usepackage{graphicx}
+\geometry{margin=1in}
+\definecolor{verde}{RGB}{0, 128, 0}
+\definecolor{rojo}{RGB}{255, 0, 0}
+\title{Proyecto 2: El Problema de la Mochila}
+\author{Emily Sanchez \\ Viviana Vargas \\[1cm] Curso: Investigación de Operaciones \\ II Semestre 2025}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\thispagestyle{empty}
+\newpage
+\setcounter{page}{1}
+
+\section{Problema de la Mochila (Knapsack Problem)}
+
+El \textbf{problema de la mochila} es un clasico de la \textit{optimizacion combinatoria}. Se dispone de una \textbf{mochila} con una \textbf{capacidad maxima} $W$ y un conjunto de $n$ objetos. Cada objeto $i$ tiene un \textbf{peso} $w_i$ y un \textbf{valor} $v_i$. El objetivo es seleccionar los objetos de manera que:
+\begin{itemize}
+  \item La suma total de los pesos no exceda la capacidad $W$.
+  \item Se maximice el valor total de los objetos elegidos.
+\end{itemize}
+
+\subsection{Variantes principales}
+\begin{description}
+  \item[0/1 Knapsack] Cada objeto puede elegirse una sola vez o no elegirse: decision binaria.
+  \item[Bounded Knapsack] Cada objeto puede seleccionarse un numero limitado de veces.
+  \item[Unbounded Knapsack] Se permite una cantidad ilimitada de cada objeto.
+\end{description}
+
+\subsection{Solucion}
+\paragraph{0/1 Knapsack} Se resuelve comunmente con \textbf{programacion dinamica}. Sea $dp[i][w]$ el valor maximo al considerar los primeros $i$ objetos y capacidad $w$.
+\[
+dp[i][w] =
+\begin{cases}
+dp[i-1][w] & \text{si } w_i > w, \\
+\max ( dp[i-1][w], v_i + dp[i-1][w - w_i] ) & \text{si } w_i \le w.
+\end{cases}
+\]
+
+\paragraph{Unbounded Knapsack} Similar al 0/1 pero permitiendo repeticiones:
+\[
+dp[w] = \max ( dp[w], v_i + dp[w - w_i] ).
+\]
+
+\thispagestyle{empty}
+\newpage
+\textbf{Tipo de problema:} Unbounded Knapsack\\
+\textbf{Capacidad máxima:} 17\\
+\textbf{Número de objetos:} 7\\
+
+\section*{Datos del Problema}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Objeto & Costo & Valor & Cantidad \\
+\hline
+A & 12.00 & 15.00 & $\infty$ \\
+B & 7.00 & 6.00 & $\infty$ \\
+C & 8.00 & 10.00 & $\infty$ \\
+D & 9.00 & 11.00 & $\infty$ \\
+E & 15.00 & 9.00 & $\infty$ \\
+F & 2.00 & 17.00 & $\infty$ \\
+G & 3.00 & 2.00 & $\infty$ \\
+\hline
+\end{tabular}
+
+\section*{Tabla de Programación Dinámica Detallada}
+\begin{center}
+\scriptsize
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+Capacidad & A & B & C & D & E & F & G \\ \hline
+0 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} \\ \hline
+1 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} \\ \hline
+2 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{17(1)} & \cellcolor{rojo}\textcolor{white}{17} \\ \hline
+3 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{17(1)} & \cellcolor{rojo}\textcolor{white}{17} \\ \hline
+4 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{34(2)} & \cellcolor{rojo}\textcolor{white}{34} \\ \hline
+5 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{34(2)} & \cellcolor{rojo}\textcolor{white}{34} \\ \hline
+6 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{51(3)} & \cellcolor{rojo}\textcolor{white}{51} \\ \hline
+7 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{6(1)} & \cellcolor{rojo}\textcolor{white}{6} & \cellcolor{rojo}\textcolor{white}{6} & \cellcolor{rojo}\textcolor{white}{6} & \cellcolor{verde}\textcolor{white}{51(3)} & \cellcolor{rojo}\textcolor{white}{51} \\ \hline
+8 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{6(1)} & \cellcolor{verde}\textcolor{white}{10(1)} & \cellcolor{rojo}\textcolor{white}{10} & \cellcolor{rojo}\textcolor{white}{10} & \cellcolor{verde}\textcolor{white}{68(4)} & \cellcolor{rojo}\textcolor{white}{68} \\ \hline
+9 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{6(1)} & \cellcolor{verde}\textcolor{white}{10(1)} & \cellcolor{verde}\textcolor{white}{11(1)} & \cellcolor{rojo}\textcolor{white}{11} & \cellcolor{verde}\textcolor{white}{68(4)} & \cellcolor{rojo}\textcolor{white}{68} \\ \hline
+10 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{6(1)} & \cellcolor{verde}\textcolor{white}{10(1)} & \cellcolor{verde}\textcolor{white}{11(1)} & \cellcolor{rojo}\textcolor{white}{11} & \cellcolor{verde}\textcolor{white}{85(5)} & \cellcolor{rojo}\textcolor{white}{85} \\ \hline
+11 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{6(1)} & \cellcolor{verde}\textcolor{white}{10(1)} & \cellcolor{verde}\textcolor{white}{11(1)} & \cellcolor{rojo}\textcolor{white}{11} & \cellcolor{verde}\textcolor{white}{85(5)} & \cellcolor{rojo}\textcolor{white}{85} \\ \hline
+12 & \cellcolor{verde}\textcolor{white}{15(1)} & \cellcolor{rojo}\textcolor{white}{15} & \cellcolor{rojo}\textcolor{white}{15} & \cellcolor{rojo}\textcolor{white}{15} & \cellcolor{rojo}\textcolor{white}{15} & \cellcolor{verde}\textcolor{white}{102(6)} & \cellcolor{rojo}\textcolor{white}{102} \\ \hline
+13 & \cellcolor{verde}\textcolor{white}{15(1)} & \cellcolor{rojo}\textcolor{white}{15} & \cellcolor{rojo}\textcolor{white}{15} & \cellcolor{rojo}\textcolor{white}{15} & \cellcolor{rojo}\textcolor{white}{15} & \cellcolor{verde}\textcolor{white}{102(6)} & \cellcolor{rojo}\textcolor{white}{102} \\ \hline
+14 & \cellcolor{verde}\textcolor{white}{15(1)} & \cellcolor{rojo}\textcolor{white}{15} & \cellcolor{rojo}\textcolor{white}{15} & \cellcolor{rojo}\textcolor{white}{15} & \cellcolor{rojo}\textcolor{white}{15} & \cellcolor{verde}\textcolor{white}{119(7)} & \cellcolor{rojo}\textcolor{white}{119} \\ \hline
+15 & \cellcolor{verde}\textcolor{white}{15(1)} & \cellcolor{rojo}\textcolor{white}{15} & \cellcolor{verde}\textcolor{white}{16(1)} & \cellcolor{rojo}\textcolor{white}{16} & \cellcolor{rojo}\textcolor{white}{16} & \cellcolor{verde}\textcolor{white}{119(7)} & \cellcolor{rojo}\textcolor{white}{119} \\ \hline
+16 & \cellcolor{verde}\textcolor{white}{15(1)} & \cellcolor{rojo}\textcolor{white}{15} & \cellcolor{verde}\textcolor{white}{20(2)} & \cellcolor{rojo}\textcolor{white}{20} & \cellcolor{rojo}\textcolor{white}{20} & \cellcolor{verde}\textcolor{white}{136(8)} & \cellcolor{rojo}\textcolor{white}{136} \\ \hline
+17 & \cellcolor{verde}\textcolor{white}{15(1)} & \cellcolor{rojo}\textcolor{white}{15} & \cellcolor{verde}\textcolor{white}{20(2)} & \cellcolor{verde}\textcolor{white}{21(1)} & \cellcolor{rojo}\textcolor{white}{21} & \cellcolor{verde}\textcolor{white}{136(8)} & \cellcolor{rojo}\textcolor{white}{136} \\ \hline
+\end{tabular}
+\end{center}
+\normalsize
+
+\section*{Solución Óptima}
+\textbf{Valor máximo obtenido:} 136\\
+\textbf{Objetos seleccionados:} F:8\\
+\textbf{Capacidad utilizada:} 16\\
+\end{document}

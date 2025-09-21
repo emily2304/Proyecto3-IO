@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.40.0 -->
+<interface>
+  <requires lib="gtk+" version="3.24"/>
+  <object class="GtkAdjustment" id="capacityAdjustment">
+    <property name="upper">20</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkFileFilter" id="filefilter1">
+    <patterns>
+      <pattern>*.csv</pattern>
+    </patterns>
+  </object>
+  <object class="GtkAdjustment" id="objectsAdjustment">
+    <property name="lower">1</property>
+    <property name="upper">20</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkWindow" id="window1">
+    <property name="can-focus">False</property>
+    <property name="resizable">False</property>
+    <child>
+      <object class="GtkFixed" id="fixed1">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class="GtkLabel" id="title1">
+            <property name="width-request">480</property>
+            <property name="height-request">80</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Knapsack Problem</property>
+            <attributes>
+              <attribute name="font-desc" value="Nimbus Roman, Bold 10"/>
+              <attribute name="weight" value="heavy"/>
+              <attribute name="variant" value="normal"/>
+              <attribute name="scale" value="4"/>
+              <attribute name="size" value="8192"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="x">32</property>
+            <property name="y">14</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label1">
+            <property name="width-request">524</property>
+            <property name="height-request">113</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Let's test it out!
+1. Select the knapsack type (hover over the radio buttons and select accordingly).
+2. Select the knapsack's capacity and object quantity desired.
+3. Complete the table as desired.
+4. Click on 'Generate solution'.</property>
+            <property name="justify">center</property>
+            <property name="wrap">True</property>
+          </object>
+          <packing>
+            <property name="x">10</property>
+            <property name="y">75</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSpinButton" id="maxCapacity">
+            <property name="width-request">118</property>
+            <property name="height-request">37</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="adjustment">capacityAdjustment</property>
+          </object>
+          <packing>
+            <property name="x">124</property>
+            <property name="y">268</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSpinButton" id="objects">
+            <property name="width-request">118</property>
+            <property name="height-request">37</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="adjustment">objectsAdjustment</property>
+            <signal name="value-changed" handler="on_objects_value_changed" swapped="no"/>
+          </object>
+          <packing>
+            <property name="x">307</property>
+            <property name="y">268</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow" id="scrollWindow">
+            <property name="width-request">307</property>
+            <property name="height-request">331</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="shadow-type">in</property>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="x">121</property>
+            <property name="y">321</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkRadioButton" id="rb_01">
+            <property name="label" translatable="yes">1/0 Knapsack</property>
+            <property name="width-request">114</property>
+            <property name="height-request">22</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">False</property>
+            <property name="tooltip-text" translatable="yes">You can only have 1 of each object. Quantity column fields will be disabled.</property>
+            <property name="active">True</property>
+            <property name="draw-indicator">True</property>
+            <signal name="toggled" handler="on_rb_01_toggled" swapped="no"/>
+          </object>
+          <packing>
+            <property name="x">47</property>
+            <property name="y">205</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkRadioButton" id="rb_bounded">
+            <property name="label" translatable="yes">Bounded</property>
+            <property name="width-request">114</property>
+            <property name="height-request">22</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">False</property>
+            <property name="tooltip-text" translatable="yes">You can have more than 1 of each object, just not infinite or negative quantity.</property>
+            <property name="active">True</property>
+            <property name="draw-indicator">True</property>
+            <property name="group">rb_01</property>
+            <signal name="toggled" handler="on_rb_bounded_toggled" swapped="no"/>
+          </object>
+          <packing>
+            <property name="x">216</property>
+            <property name="y">205</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkRadioButton" id="rb_unbounded">
+            <property name="label" translatable="yes">Unbounded</property>
+            <property name="width-request">106</property>
+            <property name="height-request">22</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">False</property>
+            <property name="tooltip-text" translatable="yes">You can have inifnity of each object. The quantity column fields will be disabled.</property>
+            <property name="active">True</property>
+            <property name="draw-indicator">True</property>
+            <property name="group">rb_01</property>
+            <signal name="toggled" handler="on_rb_unbounded_toggled" swapped="no"/>
+          </object>
+          <packing>
+            <property name="x">369</property>
+            <property name="y">205</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkFileChooserButton" id="fileLoad">
+            <property name="width-request">217</property>
+            <property name="height-request">34</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="filter">filefilter1</property>
+            <property name="use-preview-label">False</property>
+            <property name="title" translatable="yes"/>
+          </object>
+          <packing>
+            <property name="x">11</property>
+            <property name="y">777</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="loadLabel">
+            <property name="width-request">174</property>
+            <property name="height-request">20</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Load an existing  problem:</property>
+          </object>
+          <packing>
+            <property name="x">11</property>
+            <property name="y">749</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="saveProblem">
+            <property name="label" translatable="yes">Save Changes to Existing Problem</property>
+            <property name="width-request">256</property>
+            <property name="height-request">34</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+          </object>
+          <packing>
+            <property name="x">269</property>
+            <property name="y">819</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="createSolution">
+            <property name="label" translatable="yes">Generate Solution</property>
+            <property name="width-request">155</property>
+            <property name="height-request">34</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+          </object>
+          <packing>
+            <property name="x">269</property>
+            <property name="y">702</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="fileName">
+            <property name="width-request">217</property>
+            <property name="height-request">34</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+          </object>
+          <packing>
+            <property name="x">11</property>
+            <property name="y">702</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="instruction3">
+            <property name="width-request">167</property>
+            <property name="height-request">20</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Name of the solution file:</property>
+          </object>
+          <packing>
+            <property name="x">11</property>
+            <property name="y">675</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="editLatexButton">
+            <property name="label" translatable="yes">Edit</property>
+            <property name="width-request">100</property>
+            <property name="height-request">34</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+          </object>
+          <packing>
+            <property name="x">433</property>
+            <property name="y">702</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="loadToGrid">
+            <property name="label" translatable="yes">Load Problem</property>
+            <property name="width-request">128</property>
+            <property name="height-request">33</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+          </object>
+          <packing>
+            <property name="x">269</property>
+            <property name="y">777</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="exitButton1">
+            <property name="label" translatable="yes">Exit</property>
+            <property name="width-request">100</property>
+            <property name="height-request">34</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+          </object>
+          <packing>
+            <property name="x">444</property>
+            <property name="y">872</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="capacityLabel">
+            <property name="width-request">123</property>
+            <property name="height-request">20</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Knapsack Capacity</property>
+          </object>
+          <packing>
+            <property name="x">122</property>
+            <property name="y">246</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="objectsLabel">
+            <property name="width-request">123</property>
+            <property name="height-request">20</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Objects</property>
+          </object>
+          <packing>
+            <property name="x">307</property>
+            <property name="y">246</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

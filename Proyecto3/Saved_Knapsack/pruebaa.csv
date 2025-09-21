@@ -1,0 +1,7 @@
+#TYPE,01
+#CAPACITY,12
+#OBJECTS,3
+Object,Cost,Value,Quantity
+A,2,5,1
+B,3,8,1
+C,5,12,1

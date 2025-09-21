@@ -1,0 +1,100 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{geometry}
+\usepackage{multirow}
+\usepackage{graphicx}
+\geometry{margin=1in}
+\definecolor{verde}{RGB}{0, 128, 0}
+\definecolor{rojo}{RGB}{255, 0, 0}
+\title{Proyecto 2: El Problema de la Mochila}
+\author{Emily Sanchez \\ Viviana Vargas \\[1cm] Curso: Investigación de Operaciones \\ II Semestre 2025}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\thispagestyle{empty}
+\newpage
+\setcounter{page}{1}
+
+\section{Problema de la Mochila (Knapsack Problem)}
+
+El \textbf{problema de la mochila} es un clasico de la \textit{optimizacion combinatoria}. Se dispone de una \textbf{mochila} con una \textbf{capacidad maxima} $W$ y un conjunto de $n$ objetos. Cada objeto $i$ tiene un \textbf{peso} $w_i$ y an \textbf{valor} $v_i$. El objetivo es seleccionar los objetos de manera que:
+\begin{itemize}
+  \item La suma total de los pesos no exceda la capacidad $W$.
+  \item Se maximice el valor total de los objetos elegidos.
+\end{itemize}
+
+\subsection{Variantes principales}
+\begin{description}
+  \item[0/1 Knapsack] Cada objeto puede elegirse una sola vez o no elegirse: decision binaria.
+  \item[Bounded Knapsack] Cada objeto puede seleccionarse un numero limitado de veces.
+  \item[Unbounded Knapsack] Se permite una cantidad ilimitada de cada objeto.
+\end{description}
+
+\subsection{Solucion}
+\paragraph{Bounded Knapsack} Se resuelve con programación dinámica considerando las cantidades límite de cada objeto:
+\[
+dp[i][w] = \max_{k=0}^{\min(q_i, \lfloor w/w_i \rfloor)} \left( dp[i-1][w - k \cdot w_i] + k \cdot v_i \right)
+\]
+donde $q_i$ es la cantidad máxima del objeto $i$.
+
+\thispagestyle{empty}
+\newpage
+\textbf{Tipo de problema:} Bounded Knapsack\\
+\textbf{Capacidad máxima:} 11\\
+\textbf{Número de objetos:} 3\\
+
+\section*{Formulación Matemática}
+\textbf{Función objetivo:}\\
+Maximizar $Z = 7 x_{A} + 5 x_{B} + 4 x_{C}$\\
+
+\textbf{Restricción:}\\
+$5 x_{A} + 3 x_{B} + 2 x_{C} \leq 11$\\
+
+\textbf{Restricciones de variables:}\\
+$x_i \in \mathbb{Z}^+ \quad \forall i \in \{A, B, C\}$\\
+\vspace{0.5cm}
+
+\section*{Datos del Problema}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Objeto & Costo & Valor & Cantidad \\
+\hline
+A & 5,00 & 7,00 & 1 \\
+B & 3,00 & 5,00 & 1 \\
+C & 2,00 & 4,00 & 1 \\
+\hline
+\end{tabular}
+
+\section*{Tabla de Programación Dinámica Detallada}
+\begin{center}
+\scriptsize
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+Capacidad & Inicial & A & B & C \\ \hline
+0 & 0 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} \\ \hline
+1 & 0 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} \\ \hline
+2 & 0 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{4(1)} \\ \hline
+3 & 0 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{5(1)} & \cellcolor{rojo}\textcolor{white}{5} \\ \hline
+4 & 0 & \cellcolor{rojo}\textcolor{white}{0} & \cellcolor{verde}\textcolor{white}{5(1)} & \cellcolor{rojo}\textcolor{white}{5} \\ \hline
+5 & 0 & \cellcolor{verde}\textcolor{white}{7(1)} & \cellcolor{rojo}\textcolor{white}{7} & \cellcolor{verde}\textcolor{white}{9(1)} \\ \hline
+6 & 0 & \cellcolor{verde}\textcolor{white}{7(1)} & \cellcolor{rojo}\textcolor{white}{7} & \cellcolor{verde}\textcolor{white}{9(1)} \\ \hline
+7 & 0 & \cellcolor{verde}\textcolor{white}{7(1)} & \cellcolor{rojo}\textcolor{white}{7} & \cellcolor{verde}\textcolor{white}{11(1)} \\ \hline
+8 & 0 & \cellcolor{verde}\textcolor{white}{7(1)} & \cellcolor{verde}\textcolor{white}{12(1)} & \cellcolor{rojo}\textcolor{white}{12} \\ \hline
+9 & 0 & \cellcolor{verde}\textcolor{white}{7(1)} & \cellcolor{verde}\textcolor{white}{12(1)} & \cellcolor{rojo}\textcolor{white}{12} \\ \hline
+10 & 0 & \cellcolor{verde}\textcolor{white}{7(1)} & \cellcolor{verde}\textcolor{white}{12(1)} & \cellcolor{verde}\textcolor{white}{16(1)} \\ \hline
+11 & 0 & \cellcolor{verde}\textcolor{white}{7(1)} & \cellcolor{verde}\textcolor{white}{12(1)} & \cellcolor{verde}\textcolor{white}{16(1)} \\ \hline
+\end{tabular}
+\end{center}
+\normalsize
+
+\section*{Solución Óptima}
+\textbf{Valor máximo obtenido:} 16\\
+\textbf{Objetos seleccionados:} C:1, B:1, A:1\\
+\textbf{Capacidad utilizada:} 10\\
+\textbf{Capacidad restante:} 1\\
+\end{document}

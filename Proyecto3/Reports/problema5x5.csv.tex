@@ -1,0 +1,304 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{booktabs}
+\usepackage{colortbl}
+\usepackage{caption}
+\usepackage{multirow}
+\geometry{margin=1in}
+
+\usepackage{float}
+\definecolor{lightblue}{RGB}{200,230,255}
+\definecolor{lightgreen}{RGB}{220,255,220}
+\definecolor{lightred}{RGB}{255,220,220}
+\definecolor{lightyellow}{RGB}{255,255,200}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Algoritmo de Floyd - Solución}
+\fancyhead[R]{\thepage\ de \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{Proyecto 1: Rutas Optimas (Algoritmo de Floyd)}
+\author{Emily Sanchez \\ Viviana Vargas \\[1cm] Curso: Investigación de Operaciones \\ II Semestre 2025}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+\newpage
+\setcounter{page}{1}
+
+\section{Introducción}
+El algoritmo de Floyd-Warshall es un algoritmo para encontrar los caminos más cortos en un grafo ponderado. Fue publicado por Robert Floyd en 1962.\\
+El algoritmo de Floyd se basa en el principio de la Programación Dinámica.\\
+El algoritmo comienza con una tabla llamada G(0) que muestra las distancias directas entre cada nodo. Si dos nodos no están conectados directamente, la tabla marca esa distancia como infinito. Luego verifica si pasar por un nodo intermedio puede hacer que el camino entre dos nodos sea más corto.\\
+El proceso se repite hasta que todos los nodos intermedios posibles hayan sido probados (es decir, habrá una tabla G(k) para cada nodo k). Al final, la tabla P muestra la distancia más corta posible entre cada par de nodos.\\
+Podemos visualizar estos problemas con distancias entre ciudades: ¿qué pasa si quiero ir directamente de la ciudad A a la ciudad C? ¿Sería más corto ir directamente de A a C o ir de A a B y de B a C?\\
+\textbf{Complejidad espacial:} $O(n^2)$\\
+\textbf{Complejidad temporal:} $O(n^3)$\\
+\clearpage
+\section{Descripción del Problema}
+Grafo con 5 nodos:
+
+\begin{itemize}
+\item Nodo A: ALFA
+\item Nodo B: BARCO
+\item Nodo C: CASA
+\item Nodo D: DADOS
+\item Nodo E: ENRIQUE
+\end{itemize}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.5\textwidth,keepaspectratio]{grafo.png}
+\caption{Representación del grafo original}
+\end{figure}
+
+\clearpage
+\section{Procedimiento del Algoritmo}
+\subsection{Matriz de Distancias Inicial D(0)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+ & ALFA & BARCO & CASA & DADOS & ENRIQUE \\\hline
+ALFA & 0 & $\infty$ & $\infty$ & $\infty$ & 6 \\\hline
+BARCO & $\infty$ & 0 & 1 & 5 & 4 \\\hline
+CASA & 15 & $\infty$ & 0 & 21 & 23 \\\hline
+DADOS & 7 & 9 & 20 & 0 & $\infty$ \\\hline
+ENRIQUE & $\infty$ & 8 & $\infty$ & 2 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias inicial D(0)}
+\end{table}
+
+\clearpage
+\subsection{Matriz de Caminos Inicial P(0)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+ & ALFA & BARCO & CASA & DADOS & ENRIQUE \\\hline
+ALFA & - & - & - & - & ALFA \\\hline
+BARCO & - & - & BARCO & BARCO & BARCO \\\hline
+CASA & CASA & - & - & CASA & CASA \\\hline
+DADOS & DADOS & DADOS & DADOS & - & - \\\hline
+ENRIQUE & - & ENRIQUE & - & ENRIQUE & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos inicial P(0)}
+\end{table}
+
+\clearpage
+\subsection{Iteraciones del Algoritmo}
+\subsubsection{Iteración 1 (k = 1) - Nodo intermedio: ALFA}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+ & ALFA & BARCO & CASA & DADOS & ENRIQUE \\\hline
+ALFA & 0 & $\infty$ & $\infty$ & $\infty$ & 6 \\\hline
+BARCO & $\infty$ & 0 & 1 & 5 & 4 \\\hline
+CASA & 15 & $\infty$ & 0 & 21 & \cellcolor{lightgreen} 21 \\\hline
+DADOS & 7 & 9 & 20 & 0 & \cellcolor{lightgreen} 13 \\\hline
+ENRIQUE & $\infty$ & 8 & $\infty$ & 2 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(1) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+ & ALFA & BARCO & CASA & DADOS & ENRIQUE \\\hline
+ALFA & - & - & - & - & ALFA \\\hline
+BARCO & - & - & BARCO & BARCO & BARCO \\\hline
+CASA & CASA & - & - & CASA & \cellcolor{lightblue} ALFA \\\hline
+DADOS & DADOS & DADOS & DADOS & - & \cellcolor{lightblue} ALFA \\\hline
+ENRIQUE & - & ENRIQUE & - & ENRIQUE & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(1) - Cambios resaltados en azul}
+\end{table}
+
+\subsubsection{Iteración 2 (k = 2) - Nodo intermedio: BARCO}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+ & ALFA & BARCO & CASA & DADOS & ENRIQUE \\\hline
+ALFA & 0 & $\infty$ & $\infty$ & $\infty$ & 6 \\\hline
+BARCO & $\infty$ & 0 & 1 & 5 & 4 \\\hline
+CASA & 15 & $\infty$ & 0 & 21 & 21 \\\hline
+DADOS & 7 & 9 & \cellcolor{lightgreen} 10 & 0 & 13 \\\hline
+ENRIQUE & $\infty$ & 8 & \cellcolor{lightgreen} 9 & 2 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(2) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+ & ALFA & BARCO & CASA & DADOS & ENRIQUE \\\hline
+ALFA & - & - & - & - & ALFA \\\hline
+BARCO & - & - & BARCO & BARCO & BARCO \\\hline
+CASA & CASA & - & - & CASA & ALFA \\\hline
+DADOS & DADOS & DADOS & \cellcolor{lightblue} BARCO & - & ALFA \\\hline
+ENRIQUE & - & ENRIQUE & \cellcolor{lightblue} BARCO & ENRIQUE & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(2) - Cambios resaltados en azul}
+\end{table}
+
+\subsubsection{Iteración 3 (k = 3) - Nodo intermedio: CASA}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+ & ALFA & BARCO & CASA & DADOS & ENRIQUE \\\hline
+ALFA & 0 & $\infty$ & $\infty$ & $\infty$ & 6 \\\hline
+BARCO & \cellcolor{lightgreen} 16 & 0 & 1 & 5 & 4 \\\hline
+CASA & 15 & $\infty$ & 0 & 21 & 21 \\\hline
+DADOS & 7 & 9 & 10 & 0 & 13 \\\hline
+ENRIQUE & \cellcolor{lightgreen} 24 & 8 & 9 & 2 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(3) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+ & ALFA & BARCO & CASA & DADOS & ENRIQUE \\\hline
+ALFA & - & - & - & - & ALFA \\\hline
+BARCO & \cellcolor{lightblue} CASA & - & BARCO & BARCO & BARCO \\\hline
+CASA & CASA & - & - & CASA & ALFA \\\hline
+DADOS & DADOS & DADOS & BARCO & - & ALFA \\\hline
+ENRIQUE & \cellcolor{lightblue} CASA & ENRIQUE & BARCO & ENRIQUE & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(3) - Cambios resaltados en azul}
+\end{table}
+
+\subsubsection{Iteración 4 (k = 4) - Nodo intermedio: DADOS}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+ & ALFA & BARCO & CASA & DADOS & ENRIQUE \\\hline
+ALFA & 0 & $\infty$ & $\infty$ & $\infty$ & 6 \\\hline
+BARCO & \cellcolor{lightgreen} 12 & 0 & 1 & 5 & 4 \\\hline
+CASA & 15 & \cellcolor{lightgreen} 30 & 0 & 21 & 21 \\\hline
+DADOS & 7 & 9 & 10 & 0 & 13 \\\hline
+ENRIQUE & \cellcolor{lightgreen} 9 & 8 & 9 & 2 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(4) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+ & ALFA & BARCO & CASA & DADOS & ENRIQUE \\\hline
+ALFA & - & - & - & - & ALFA \\\hline
+BARCO & \cellcolor{lightblue} DADOS & - & BARCO & BARCO & BARCO \\\hline
+CASA & CASA & \cellcolor{lightblue} DADOS & - & CASA & ALFA \\\hline
+DADOS & DADOS & DADOS & BARCO & - & ALFA \\\hline
+ENRIQUE & \cellcolor{lightblue} DADOS & ENRIQUE & BARCO & ENRIQUE & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(4) - Cambios resaltados en azul}
+\end{table}
+
+\subsubsection{Iteración 5 (k = 5) - Nodo intermedio: ENRIQUE}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+ & ALFA & BARCO & CASA & DADOS & ENRIQUE \\\hline
+ALFA & 0 & \cellcolor{lightgreen} 14 & \cellcolor{lightgreen} 15 & \cellcolor{lightgreen} 8 & 6 \\\hline
+BARCO & 12 & 0 & 1 & 5 & 4 \\\hline
+CASA & 15 & \cellcolor{lightgreen} 29 & 0 & 21 & 21 \\\hline
+DADOS & 7 & 9 & 10 & 0 & 13 \\\hline
+ENRIQUE & 9 & 8 & 9 & 2 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(5) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+ & ALFA & BARCO & CASA & DADOS & ENRIQUE \\\hline
+ALFA & - & \cellcolor{lightblue} ENRIQUE & \cellcolor{lightblue} BARCO & \cellcolor{lightblue} ENRIQUE & ALFA \\\hline
+BARCO & DADOS & - & BARCO & BARCO & BARCO \\\hline
+CASA & CASA & \cellcolor{lightblue} ENRIQUE & - & CASA & ALFA \\\hline
+DADOS & DADOS & DADOS & BARCO & - & ALFA \\\hline
+ENRIQUE & DADOS & ENRIQUE & BARCO & ENRIQUE & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(5) - Cambios resaltados en azul}
+\end{table}
+
+\clearpage
+\section{Resultados Finales}
+\subsection{Matriz de Distancias Final D(5)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+ & ALFA & BARCO & CASA & DADOS & ENRIQUE \\\hline
+ALFA & 0 & 14 & 15 & 8 & 6 \\\hline
+BARCO & 12 & 0 & 1 & 5 & 4 \\\hline
+CASA & 15 & 29 & 0 & 21 & 21 \\\hline
+DADOS & 7 & 9 & 10 & 0 & 13 \\\hline
+ENRIQUE & 9 & 8 & 9 & 2 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias final D(5)}
+\end{table}
+
+\clearpage
+\subsection{Matriz de Caminos Final P(5)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+ & ALFA & BARCO & CASA & DADOS & ENRIQUE \\\hline
+ALFA & - & ENRIQUE & BARCO & ENRIQUE & ALFA \\\hline
+BARCO & DADOS & - & BARCO & BARCO & BARCO \\\hline
+CASA & CASA & ENRIQUE & - & CASA & ALFA \\\hline
+DADOS & DADOS & DADOS & BARCO & - & ALFA \\\hline
+ENRIQUE & DADOS & ENRIQUE & BARCO & ENRIQUE & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos final P(5)}
+\end{table}
+
+\clearpage
+\subsection{Rutas Óptimas}
+\begin{itemize}
+\item \textbf{ALFA → BARCO:} Distancia: 14, Ruta: ALFA → ENRIQUE → BARCO
+\item \textbf{ALFA → CASA:} Distancia: 15, Ruta: ALFA → ENRIQUE → BARCO → CASA
+\item \textbf{ALFA → DADOS:} Distancia: 8, Ruta: ALFA → ENRIQUE → DADOS
+\item \textbf{ALFA → ENRIQUE:} Distancia: 6, Ruta: ALFA → ENRIQUE
+\item \textbf{BARCO → ALFA:} Distancia: 12, Ruta: BARCO → DADOS → ALFA
+\item \textbf{BARCO → CASA:} Distancia: 1, Ruta: BARCO → CASA
+\item \textbf{BARCO → DADOS:} Distancia: 5, Ruta: BARCO → DADOS
+\item \textbf{BARCO → ENRIQUE:} Distancia: 4, Ruta: BARCO → ENRIQUE
+\item \textbf{CASA → ALFA:} Distancia: 15, Ruta: CASA → ALFA
+\item \textbf{CASA → BARCO:} Distancia: 29, Ruta: CASA → ALFA → ENRIQUE → BARCO
+\item \textbf{CASA → DADOS:} Distancia: 21, Ruta: CASA → DADOS
+\item \textbf{CASA → ENRIQUE:} Distancia: 21, Ruta: CASA → ALFA → ENRIQUE
+\item \textbf{DADOS → ALFA:} Distancia: 7, Ruta: DADOS → ALFA
+\item \textbf{DADOS → BARCO:} Distancia: 9, Ruta: DADOS → BARCO
+\item \textbf{DADOS → CASA:} Distancia: 10, Ruta: DADOS → BARCO → CASA
+\item \textbf{DADOS → ENRIQUE:} Distancia: 13, Ruta: DADOS → ALFA → ENRIQUE
+\item \textbf{ENRIQUE → ALFA:} Distancia: 9, Ruta: ENRIQUE → DADOS → ALFA
+\item \textbf{ENRIQUE → BARCO:} Distancia: 8, Ruta: ENRIQUE → BARCO
+\item \textbf{ENRIQUE → CASA:} Distancia: 9, Ruta: ENRIQUE → BARCO → CASA
+\item \textbf{ENRIQUE → DADOS:} Distancia: 2, Ruta: ENRIQUE → DADOS
+\end{itemize}
+\end{document}

@@ -1,0 +1,5 @@
+#TYPE,BOUNDED
+#CAPACITY,1
+#OBJECTS,1
+Object,Cost,Value,Quantity
+A,0,0,1

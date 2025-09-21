@@ -1,0 +1,254 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{booktabs}
+\usepackage{colortbl}
+\usepackage{caption}
+\usepackage{multirow}
+\geometry{margin=1in}
+
+\usepackage{float}
+\definecolor{lightblue}{RGB}{200,230,255}
+\definecolor{lightgreen}{RGB}{220,255,220}
+\definecolor{lightred}{RGB}{255,220,220}
+\definecolor{lightyellow}{RGB}{255,255,200}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Algoritmo de Floyd - Solución}
+\fancyhead[R]{\thepage\ de \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\title{Proyecto 1: Rutas Optimas (Algoritmo de Floyd)}
+\author{Emily Sanchez \\ Viviana Vargas \\[1cm] Curso: Investigación de Operaciones \\ II Semestre 2025}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+\newpage
+\setcounter{page}{1}
+
+\section{Introducción}
+El algoritmo de Floyd-Warshall es un algoritmo para encontrar los caminos más cortos en un grafo ponderado. Fue publicado por Robert Floyd en 1962.\\
+El algoritmo de Floyd se basa en el principio de la Programación Dinámica.\\
+\textbf{Complejidad espacial:} $O(n^2)$\\
+\textbf{Complejidad temporal:} $O(n^3)$\\
+\clearpage
+\section{Descripción del Problema}
+Grafo con 4 nodos:
+
+\begin{itemize}
+\item Nodo A: A
+\item Nodo B: B
+\item Nodo C: C
+\item Nodo D: D
+\end{itemize}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.5\textwidth,keepaspectratio]{grafo.png}
+\caption{Representación del grafo original}
+\end{figure}
+
+\clearpage
+\section{Procedimiento del Algoritmo}
+\subsection{Matriz de Distancias Inicial D(0)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+ & A & B & C & D \\\hline
+A & 0 & 0 & 0 & 0 \\\hline
+B & 0 & 0 & 0 & 0 \\\hline
+C & 0 & 0 & 0 & 0 \\\hline
+D & 0 & 0 & 0 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias inicial D(0)}
+\end{table}
+
+\clearpage
+\subsection{Matriz de Caminos Inicial P(0)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+ & A & B & C & D \\\hline
+A & - & A & A & A \\\hline
+B & B & - & B & B \\\hline
+C & C & C & - & C \\\hline
+D & D & D & D & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos inicial P(0)}
+\end{table}
+
+\subsection{Iteraciones del Algoritmo}
+\clearpage
+\subsubsection{Iteración 1 (k = 1) - Nodo intermedio: A}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+ & A & B & C & D \\\hline
+A & 0 & 0 & 0 & 0 \\\hline
+B & 0 & 0 & 0 & 0 \\\hline
+C & 0 & 0 & 0 & 0 \\\hline
+D & 0 & 0 & 0 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(1) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+ & A & B & C & D \\\hline
+A & - & A & A & A \\\hline
+B & B & - & B & B \\\hline
+C & C & C & - & C \\\hline
+D & D & D & D & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(1) - Cambios resaltados en azul}
+\end{table}
+
+\clearpage
+\subsubsection{Iteración 2 (k = 2) - Nodo intermedio: B}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+ & A & B & C & D \\\hline
+A & 0 & 0 & 0 & 0 \\\hline
+B & 0 & 0 & 0 & 0 \\\hline
+C & 0 & 0 & 0 & 0 \\\hline
+D & 0 & 0 & 0 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(2) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+ & A & B & C & D \\\hline
+A & - & A & A & A \\\hline
+B & B & - & B & B \\\hline
+C & C & C & - & C \\\hline
+D & D & D & D & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(2) - Cambios resaltados en azul}
+\end{table}
+
+\clearpage
+\subsubsection{Iteración 3 (k = 3) - Nodo intermedio: C}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+ & A & B & C & D \\\hline
+A & 0 & 0 & 0 & 0 \\\hline
+B & 0 & 0 & 0 & 0 \\\hline
+C & 0 & 0 & 0 & 0 \\\hline
+D & 0 & 0 & 0 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(3) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+ & A & B & C & D \\\hline
+A & - & A & A & A \\\hline
+B & B & - & B & B \\\hline
+C & C & C & - & C \\\hline
+D & D & D & D & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(3) - Cambios resaltados en azul}
+\end{table}
+
+\clearpage
+\subsubsection{Iteración 4 (k = 4) - Nodo intermedio: D}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+ & A & B & C & D \\\hline
+A & 0 & 0 & 0 & 0 \\\hline
+B & 0 & 0 & 0 & 0 \\\hline
+C & 0 & 0 & 0 & 0 \\\hline
+D & 0 & 0 & 0 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias D(4) - Cambios resaltados en verde}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+ & A & B & C & D \\\hline
+A & - & A & A & A \\\hline
+B & B & - & B & B \\\hline
+C & C & C & - & C \\\hline
+D & D & D & D & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos P(4) - Cambios resaltados en azul}
+\end{table}
+
+\clearpage
+\section{Resultados Finales}
+\subsection{Matriz de Distancias Final D(4)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+ & A & B & C & D \\\hline
+A & 0 & 0 & 0 & 0 \\\hline
+B & 0 & 0 & 0 & 0 \\\hline
+C & 0 & 0 & 0 & 0 \\\hline
+D & 0 & 0 & 0 & 0 \\\hline
+\end{tabular}
+\caption{Matriz de distancias final D(4)}
+\end{table}
+
+\clearpage
+\subsection{Matriz de Caminos Final P(4)}
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+ & A & B & C & D \\\hline
+A & - & A & A & A \\\hline
+B & B & - & B & B \\\hline
+C & C & C & - & C \\\hline
+D & D & D & D & - \\\hline
+\end{tabular}
+\caption{Matriz de caminos final P(4)}
+\end{table}
+
+\clearpage
+\subsection{Rutas Óptimas}
+\begin{itemize}
+\item \textbf{A → B:} Distancia: 0, Ruta: A → B
+\item \textbf{A → C:} Distancia: 0, Ruta: A → C
+\item \textbf{A → D:} Distancia: 0, Ruta: A → D
+\item \textbf{B → A:} Distancia: 0, Ruta: B → A
+\item \textbf{B → C:} Distancia: 0, Ruta: B → C
+\item \textbf{B → D:} Distancia: 0, Ruta: B → D
+\item \textbf{C → A:} Distancia: 0, Ruta: C → A
+\item \textbf{C → B:} Distancia: 0, Ruta: C → B
+\item \textbf{C → D:} Distancia: 0, Ruta: C → D
+\item \textbf{D → A:} Distancia: 0, Ruta: D → A
+\item \textbf{D → B:} Distancia: 0, Ruta: D → B
+\item \textbf{D → C:} Distancia: 0, Ruta: D → C
+\end{itemize}
+\end{document}

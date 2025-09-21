@@ -1,0 +1,11 @@
+#TYPE,UNBOUNDED
+#CAPACITY,17
+#OBJECTS,7
+Object,Cost,Value,Quantity
+A,12,16,∞
+B,7,6,∞
+C,8,10,∞
+D,9,11,∞
+E,15,9,∞
+F,2,17,∞
+G,3,2,∞

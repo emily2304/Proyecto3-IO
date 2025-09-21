@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.40.0 -->
+<interface>
+  <requires lib="gtk+" version="3.24"/>
+  <object class="GtkAdjustment" id="adjustment1">
+    <property name="lower">1</property>
+    <property name="upper">20</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkWindow" id="dialog">
+    <property name="can-focus">False</property>
+    <property name="resizable">False</property>
+    <property name="deletable">False</property>
+    <child>
+      <object class="GtkFixed" id="fixed">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class="GtkLabel" id="errorLabel1">
+            <property name="width-request">344</property>
+            <property name="height-request">212</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Please only enter numbers between 1 and 8
+                              (1, 2, 3, 4, 5, 6, 7, 8).</property>
+          </object>
+          <packing>
+            <property name="y">25</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="title3">
+            <property name="width-request">108</property>
+            <property name="height-request">80</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Oops!</property>
+            <attributes>
+              <attribute name="font-desc" value="Nimbus Roman, Bold 10"/>
+              <attribute name="weight" value="heavy"/>
+              <attribute name="variant" value="normal"/>
+              <attribute name="scale" value="4"/>
+              <attribute name="size" value="8192"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="x">113</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="tryAgain">
+            <property name="label" translatable="yes">Try Again</property>
+            <property name="width-request">100</property>
+            <property name="height-request">34</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+          </object>
+          <packing>
+            <property name="x">129</property>
+            <property name="y">178</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkFileFilter" id="filefilter1">
+    <patterns>
+      <pattern>*.csv</pattern>
+    </patterns>
+  </object>
+  <object class="GtkWindow" id="window1">
+    <property name="can-focus">False</property>
+    <child>
+      <object class="GtkFixed" id="fixed2">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class="GtkLabel" id="title">
+            <property name="width-request">610</property>
+            <property name="height-request">67</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Floyd-Warshall Algorithm</property>
+            <attributes>
+              <attribute name="font-desc" value="Nimbus Roman, Bold 10"/>
+              <attribute name="weight" value="heavy"/>
+              <attribute name="variant" value="normal"/>
+              <attribute name="scale" value="4"/>
+              <attribute name="size" value="8192"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="y">15</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="description">
+            <property name="width-request">605</property>
+            <property name="height-request">126</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Let's try the Floyd-Warshall algorithm!
+Please select the quantity of nodes (columns and rows) you want for this problem.
+Fill the cells with the distances between each node. The default value is infinite, so if no
+data is entered, it will count as infinite.
+The infinite can be represented with the letter 'i' (uppercase or lowercase) or the '∞' symbol.
+You can also load a pre-existing .csv problem from the file chooser at the bottom of
+the screen.</property>
+            <property name="justify">center</property>
+          </object>
+          <packing>
+            <property name="x">5</property>
+            <property name="y">77</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="instruction">
+            <property name="width-request">211</property>
+            <property name="height-request">39</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Quantity of nodes wanted (1 - 8)</property>
+          </object>
+          <packing>
+            <property name="x">105</property>
+            <property name="y">225</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkFileChooserButton" id="fileLoad">
+            <property name="width-request">182</property>
+            <property name="height-request">37</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="filter">filefilter1</property>
+            <property name="use-preview-label">False</property>
+            <property name="title" translatable="yes"/>
+            <signal name="file-set" handler="on_fileLoad_file_set" swapped="no"/>
+          </object>
+          <packing>
+            <property name="x">17</property>
+            <property name="y">838</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="loadLabel">
+            <property name="width-request">174</property>
+            <property name="height-request">42</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Load an existing  problem:</property>
+          </object>
+          <packing>
+            <property name="x">17</property>
+            <property name="y">804</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSpinButton" id="spinNodes">
+            <property name="width-request">118</property>
+            <property name="height-request">43</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="adjustment">adjustment1</property>
+            <signal name="value-changed" handler="on_spinNodes_value_changed" swapped="no"/>
+          </object>
+          <packing>
+            <property name="x">333</property>
+            <property name="y">225</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="saveProblem">
+            <property name="label" translatable="yes">Save Changes to Existing Problem</property>
+            <property name="width-request">256</property>
+            <property name="height-request">37</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+          </object>
+          <packing>
+            <property name="x">344</property>
+            <property name="y">838</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="createSolution">
+            <property name="label" translatable="yes">Generate Solution</property>
+            <property name="width-request">155</property>
+            <property name="height-request">40</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+          </object>
+          <packing>
+            <property name="x">445</property>
+            <property name="y">712</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow" id="scrollWindow">
+            <property name="width-request">586</property>
+            <property name="height-request">372</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="shadow-type">in</property>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="x">14</property>
+            <property name="y">279</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="fileName">
+            <property name="width-request">284</property>
+            <property name="height-request">40</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+          </object>
+          <packing>
+            <property name="x">17</property>
+            <property name="y">712</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="instruction3">
+            <property name="width-request">167</property>
+            <property name="height-request">36</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Name of the solution file:</property>
+          </object>
+          <packing>
+            <property name="x">17</property>
+            <property name="y">679</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="editLatexButton">
+            <property name="label" translatable="yes">Edit</property>
+            <property name="width-request">100</property>
+            <property name="height-request">38</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+          </object>
+          <packing>
+            <property name="x">470</property>
+            <property name="y">763</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="loadToGrid">
+            <property name="label" translatable="yes">Load Problem</property>
+            <property name="width-request">128</property>
+            <property name="height-request">37</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+          </object>
+          <packing>
+            <property name="x">209</property>
+            <property name="y">838</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="exitButton1">
+            <property name="label" translatable="yes">Exit</property>
+            <property name="width-request">100</property>
+            <property name="height-request">34</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+          </object>
+          <packing>
+            <property name="x">513</property>
+            <property name="y">890</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
