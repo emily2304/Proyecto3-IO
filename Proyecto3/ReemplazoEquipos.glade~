@@ -45,38 +45,38 @@
           </object>
           <packing>
             <property name="x">110</property>
-            <property name="y">9</property>
+            <property name="y">2</property>
           </packing>
         </child>
         <child>
           <object class="GtkLabel" id="descReemplazo">
             <property name="width-request">524</property>
-            <property name="height-request">113</property>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">Optimal Equipment Replacement System
 1. Enter the initial cost, project time, and useful life.
-2. Complete the table with maintenance, resale, and profit costs.
+3. If you want to include profit, check the 'Profit' box.
+2. Complete the table with maintenance, resale, and profit costs if selected.
 3. Click 'Generate Solution' to obtain the optimal plan.</property>
             <property name="justify">center</property>
             <property name="wrap">True</property>
           </object>
           <packing>
             <property name="x">90</property>
-            <property name="y">66</property>
+            <property name="y">64</property>
           </packing>
         </child>
         <child>
           <object class="GtkEntry" id="costoEntry">
-            <property name="width-request">168</property>
+            <property name="width-request">83</property>
             <property name="height-request">37</property>
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="placeholder-text">0.00</property>
           </object>
           <packing>
-            <property name="x">85</property>
-            <property name="y">207</property>
+            <property name="x">99</property>
+            <property name="y">205</property>
           </packing>
         </child>
         <child>
@@ -88,8 +88,8 @@
             <property name="label" translatable="yes">Initial cost ($)</property>
           </object>
           <packing>
-            <property name="x">87</property>
-            <property name="y">184</property>
+            <property name="x">120</property>
+            <property name="y">185</property>
           </packing>
         </child>
         <child>
@@ -103,7 +103,7 @@
           </object>
           <packing>
             <property name="x">291</property>
-            <property name="y">206</property>
+            <property name="y">205</property>
           </packing>
         </child>
         <child>
@@ -116,7 +116,7 @@
           </object>
           <packing>
             <property name="x">291</property>
-            <property name="y">186</property>
+            <property name="y">185</property>
           </packing>
         </child>
         <child>
@@ -129,8 +129,8 @@
             <signal name="value-changed" handler="on_vida_changed" swapped="no"/>
           </object>
           <packing>
-            <property name="x">452</property>
-            <property name="y">204</property>
+            <property name="x">430</property>
+            <property name="y">205</property>
           </packing>
         </child>
         <child>
@@ -139,24 +139,24 @@
             <property name="height-request">20</property>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Useful life</property>
+            <property name="label" translatable="yes">Lifespan</property>
           </object>
           <packing>
-            <property name="x">452</property>
-            <property name="y">183</property>
+            <property name="x">429</property>
+            <property name="y">185</property>
           </packing>
         </child>
         <child>
           <object class="GtkScrolledWindow" id="scrollReemplazo">
-            <property name="width-request">550</property>
-            <property name="height-request">300</property>
+            <property name="width-request">387</property>
+            <property name="height-request">297</property>
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="shadow-type">in</property>
           </object>
           <packing>
-            <property name="x">53</property>
-            <property name="y">246</property>
+            <property name="x">146</property>
+            <property name="y">250</property>
           </packing>
         </child>
         <child>
@@ -170,7 +170,7 @@
           </object>
           <packing>
             <property name="x">28</property>
-            <property name="y">646</property>
+            <property name="y">645</property>
           </packing>
         </child>
         <child>
@@ -182,7 +182,7 @@
             <property name="label" translatable="yes">Load an existing problem:</property>
           </object>
           <packing>
-            <property name="x">33</property>
+            <property name="x">28</property>
             <property name="y">623</property>
           </packing>
         </child>
@@ -197,7 +197,7 @@
           </object>
           <packing>
             <property name="x">258</property>
-            <property name="y">646</property>
+            <property name="y">645</property>
           </packing>
         </child>
         <child>
@@ -236,7 +236,7 @@
             <property name="label" translatable="yes">Name of the solution file:</property>
           </object>
           <packing>
-            <property name="x">41</property>
+            <property name="x">28</property>
             <property name="y">555</property>
           </packing>
         </child>
@@ -266,7 +266,37 @@
           </object>
           <packing>
             <property name="x">420</property>
-            <property name="y">580</property>
+            <property name="y">579</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="exitReemplazo">
+            <property name="label" translatable="yes">Exit</property>
+            <property name="width-request">100</property>
+            <property name="height-request">36</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+          </object>
+          <packing>
+            <property name="x">561</property>
+            <property name="y">748</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton" id="profitCheck">
+            <property name="label" translatable="yes">I want to add profit</property>
+            <property name="width-request">157</property>
+            <property name="height-request">22</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">False</property>
+            <property name="draw-indicator">True</property>
+            <signal name="toggled" handler="on_profitCheck_toggled" swapped="no"/>
+          </object>
+          <packing>
+            <property name="x">269</property>
+            <property name="y">161</property>
           </packing>
         </child>
       </object>
