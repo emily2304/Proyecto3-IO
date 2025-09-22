@@ -1,4 +1,4 @@
-/* Proyecto 2 IO - Reemplazo de Equipos
+/* Proyecto 3 IO - Reemplazo de Equipos
    Estudiantes:
    Emily Sánchez -
    Viviana Vargas -
@@ -38,7 +38,7 @@ GPtrArray *entryResale = NULL;
 GPtrArray *entryMaint  = NULL;
 GPtrArray *entryProfit   = NULL;
 static gchar *selected_csv_path = NULL;
-
+static gchar *last_selected_tex_reemplazo = NULL;
 
 // Struct para la info
 typedef struct {
@@ -568,9 +568,129 @@ double equipo_replacement_algorithm(int n, double *costo, double *valor_residual
 
 
 
-// --- Callbacks faltantes (placeholder) ---
+// --- LATEX
+void compile_latex_file(const gchar *tex_file) {
+    gchar *dir = g_path_get_dirname(tex_file);
+    gchar *base = g_path_get_basename(tex_file);
+    
+    gchar *cmd = g_strdup_printf("cd \"%s\" && pdflatex -interaction=nonstopmode \"%s\"", dir, base);
+    int result = system(cmd);
+    
+    if (result == 0) {
+        gchar *pdf_file;
+        if (g_str_has_suffix(base, ".tex")) {
+            gchar *base_name = g_strndup(base, strlen(base) - 4);
+            pdf_file = g_strdup_printf("%s/%s.pdf", dir, base_name);
+            g_free(base_name);
+        } else {
+            pdf_file = g_strdup_printf("%s/%s.pdf", dir, base);
+        }
+        
+        if (g_file_test(pdf_file, G_FILE_TEST_EXISTS)) {
+            gchar *view_cmd = g_strdup_printf("evince --presentation \"%s\" &", pdf_file);
+            system(view_cmd);
+            g_free(view_cmd);
+        }
+        g_free(pdf_file);
+    }
+    
+    g_free(cmd);
+    g_free(dir);
+    g_free(base);
+}
+
 void on_select_latex_file_reemplazo(GtkButton *button, gpointer data) {
-    g_print("Botón seleccionar archivo LaTeX presionado\n");
+    GtkWidget *dialog;
+    GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
+    gint res;
+
+    dialog = gtk_file_chooser_dialog_new("Select LaTeX File",
+                                        GTK_WINDOW(windowReemplazo),
+                                        action,
+                                        "Cancel",
+                                        GTK_RESPONSE_CANCEL,
+                                        "Open",
+                                        GTK_RESPONSE_ACCEPT,
+                                        NULL);
+
+    GtkFileFilter *filter = gtk_file_filter_new();
+    gtk_file_filter_set_name(filter, "LaTeX Files (*.tex)");
+    gtk_file_filter_add_pattern(filter, "*.tex");
+    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
+
+    gchar *reports_dir = g_build_filename(g_get_current_dir(), "ReportsEquipment", NULL);
+    if (g_file_test(reports_dir, G_FILE_TEST_IS_DIR)) {
+        gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), reports_dir);
+    }
+    g_free(reports_dir);
+
+    res = gtk_dialog_run(GTK_DIALOG(dialog));
+    
+    if (res == GTK_RESPONSE_ACCEPT) {
+        GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
+        if (last_selected_tex_reemplazo) {
+            g_free(last_selected_tex_reemplazo);
+        }
+        last_selected_tex_reemplazo = gtk_file_chooser_get_filename(chooser);
+        
+        GtkWidget *choice_dialog = gtk_dialog_new_with_buttons(
+            "What do you want to do?",
+            GTK_WINDOW(windowReemplazo),
+            GTK_DIALOG_MODAL,
+            "Edit",
+            GTK_RESPONSE_YES,
+            "Compile",
+            GTK_RESPONSE_NO,
+            "Both",
+            GTK_RESPONSE_APPLY,
+            NULL
+        );
+        
+        GtkWidget *content_area = gtk_dialog_get_content_area(GTK_DIALOG(choice_dialog));
+        GtkWidget *label = gtk_label_new("Select an option for the LaTeX file:");
+        gtk_container_add(GTK_CONTAINER(content_area), label);
+        gtk_widget_show_all(choice_dialog);
+        
+        gint choice = gtk_dialog_run(GTK_DIALOG(choice_dialog));
+        gtk_widget_destroy(choice_dialog);
+        
+        if (choice == GTK_RESPONSE_YES) {
+            gchar *edit_cmd = g_strdup_printf("xdg-open \"%s\"", last_selected_tex_reemplazo);
+            system(edit_cmd);
+            g_free(edit_cmd);
+        } else if (choice == GTK_RESPONSE_NO) {
+            compile_latex_file(last_selected_tex_reemplazo);
+        } else if (choice == GTK_RESPONSE_APPLY) {
+            gchar *edit_cmd = g_strdup_printf("xdg-open \"%s\"", last_selected_tex_reemplazo);
+            system(edit_cmd);
+            g_free(edit_cmd);
+            
+            GtkWidget *compile_dialog = gtk_dialog_new_with_buttons(
+                "Recompile PDF",
+                GTK_WINDOW(windowReemplazo),
+                GTK_DIALOG_MODAL,
+                "Compile now",
+                GTK_RESPONSE_YES,
+                "Later",
+                GTK_RESPONSE_NO,
+                NULL
+            );
+            
+            GtkWidget *compile_content = gtk_dialog_get_content_area(GTK_DIALOG(compile_dialog));
+            GtkWidget *compile_label = gtk_label_new("Do you want to compile the PDF now?");
+            gtk_container_add(GTK_CONTAINER(compile_content), compile_label);
+            gtk_widget_show_all(compile_dialog);
+            
+            gint compile_response = gtk_dialog_run(GTK_DIALOG(compile_dialog));
+            gtk_widget_destroy(compile_dialog);
+            
+            if (compile_response == GTK_RESPONSE_YES) {
+                compile_latex_file(last_selected_tex_reemplazo);
+            }
+        }
+    }
+    
+    gtk_widget_destroy(dialog);
 }
 
 void on_exit_reemplazo_clicked(GtkButton *button, gpointer data) {
@@ -659,7 +779,7 @@ void on_file_load_reemplazo(GtkFileChooserButton *chooser, gpointer data) {
     }
 }
 
-// Función para inicializar la ventana (similar a init_knapsack)
+// MAIN
 int main(int argc, char *argv[]) {
     gtk_init(&argc, &argv);
     
