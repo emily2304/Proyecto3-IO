@@ -1,3 +1,4 @@
+
 /* Proyecto 3 IO - Reemplazo de Equipos
    Estudiantes:
    Emily Sánchez -
@@ -49,6 +50,13 @@ typedef struct {
     double *costo_mant;
     double *beneficio;
 } Equipment;
+
+typedef struct {
+    double costo_minimo;
+    int proximo_reemplazo;
+    GPtrArray *planes; // Array de posibles planes óptimos
+} SolucionReemplazo;
+
 
 
 void set_css(GtkCssProvider *cssProvider, GtkWidget *widget);
@@ -529,44 +537,100 @@ static gboolean load_from_csv(const char *path) {
     return TRUE;
 }
 
-
-
-// --- Algoritmo de reemplazo de equipos ---
-double equipo_replacement_algorithm(int n, double *costo, double *valor_residual, double *costo_mant, double *beneficio, double W) {
-    dp_equipo = (double **)malloc((n + 1) * sizeof(double *));
-    decision_equipo = (int **)malloc((n + 1) * sizeof(int *));
-    for (int i = 0; i <= n; i++) {
-        dp_equipo[i] = (double *)malloc((int)(W + 1) * sizeof(double));
-        decision_equipo[i] = (int *)malloc((int)(W + 1) * sizeof(int));
+double calcular_costo_periodo_correcto(Equipment *e, int inicio, int fin, int vida_util_equipo) {
+    if (fin <= inicio) return 0.0;
+    int duracion = fin - inicio; 
+    if (duracion > vida_util_equipo) {
+        return 1e20; 
     }
-
-    for (int i = 0; i <= n; i++) {
-        for (int w = 0; w <= W; w++) {
-            if (i == 0 || w == 0) {
-                dp_equipo[i][w] = 0;
-            } else if (costo[i - 1] <= w) {
-                double incl = beneficio[i - 1] - costo_mant[i - 1] - valor_residual[i - 1]
-                              + dp_equipo[i - 1][(int)(w - costo[i - 1])];
-                double excl = dp_equipo[i - 1][w];
-                if (incl > excl) {
-                    dp_equipo[i][w] = incl;
-                    decision_equipo[i][w] = 1;
-                } else {
-                    dp_equipo[i][w] = excl;
-                    decision_equipo[i][w] = 0;
-                }
-            } else {
-                dp_equipo[i][w] = dp_equipo[i - 1][w];
-                decision_equipo[i][w] = 0;
-            }
+    double costo_total = e->costo[0];
+    for (int i = 0; i < duracion; i++) {
+        if (i < e->n) { 
+            costo_total += e->costo_mant[i];
         }
     }
-
-    double result = dp_equipo[n][(int)W];
-    return result;
+    if (duracion > 0 && duracion <= e->n) {
+        costo_total -= e->valor_residual[duracion - 1];
+    }
+    return costo_total;
 }
 
-
+// Función del algoritmo
+SolucionReemplazo* equipo_replacement_algorithm_corregido(Equipment *e, int vida_util_equipo) {
+    int plazo_proyecto = e->n; 
+    SolucionReemplazo *sol = g_new0(SolucionReemplazo, 1);
+    sol->planes = g_ptr_array_new_with_free_func(g_free);
+    
+    g_print("Plazo del proyecto (vidaSpin): %d años\n", plazo_proyecto);
+    g_print("Vida útil del equipo (plazoSpin): %d años\n", vida_util_equipo);
+    g_print("Costo inicial: $%.2f\n", e->costo[0]);
+    double *g = g_new0(double, plazo_proyecto + 1); 
+    GPtrArray **planes_por_tiempo = g_new0(GPtrArray*, plazo_proyecto + 1); 
+    
+    for (int i = 0; i <= plazo_proyecto; i++) {
+        planes_por_tiempo[i] = g_ptr_array_new_with_free_func(g_free);
+    }
+    g[plazo_proyecto] = 0.0;
+    g_ptr_array_add(planes_por_tiempo[plazo_proyecto], g_strdup(""));
+    
+    for (int t = plazo_proyecto - 1; t >= 0; t--) {
+        g[t] = 1e20; 
+        GPtrArray *mejores_j = g_ptr_array_new();
+        for (int j = t + 1; j <= plazo_proyecto; j++) {
+            int duracion = j - t;
+            if (duracion > vida_util_equipo) continue;
+            double costo_actual = calcular_costo_periodo_correcto(e, t, j, vida_util_equipo);
+            if (costo_actual >= 1e20) continue;
+            double costo_total = costo_actual + g[j];
+            g_print("g(%d): C_%d,%d + g(%d) = %.2f + %.2f = %.2f\n", t, t, j, j, costo_actual, g[j], costo_total);
+            if (costo_total < g[t] - 1e-9) {
+                g[t] = costo_total;
+                g_ptr_array_set_size(mejores_j, 0);
+                g_ptr_array_add(mejores_j, GINT_TO_POINTER(j));
+            } 
+            else if (fabs(costo_total - g[t]) < 1e-9) {
+                g_ptr_array_add(mejores_j, GINT_TO_POINTER(j));
+            }
+        }
+        for (guint i = 0; i < mejores_j->len; i++) {
+            int j = GPOINTER_TO_INT(g_ptr_array_index(mejores_j, i));
+            
+            if (planes_por_tiempo[j]->len > 0) {
+                for (guint k = 0; k < planes_por_tiempo[j]->len; k++) {
+                    char *plan_existente = (char*)g_ptr_array_index(planes_por_tiempo[j], k);
+                    char *nuevo_plan;
+                    if (strlen(plan_existente) > 0) {
+                        nuevo_plan = g_strdup_printf("%d-%s", j, plan_existente);
+                    } else {
+                        nuevo_plan = g_strdup_printf("%d", j);
+                    }
+                    g_ptr_array_add(planes_por_tiempo[t], nuevo_plan);
+                }
+            } else {
+                char *plan_base = g_strdup_printf("%d", j);
+                g_ptr_array_add(planes_por_tiempo[t], plan_base);
+            }
+        }
+        
+        g_ptr_array_free(mejores_j, TRUE);
+        g_print("g(%d) = %.2f\n", t, g[t]);
+    }
+    
+    sol->costo_minimo = g[0];
+    for (guint i = 0; i < planes_por_tiempo[0]->len; i++) {
+        char *plan = (char*)g_ptr_array_index(planes_por_tiempo[0], i);
+        char *plan_completo = g_strdup_printf("0-%s", plan);
+        g_ptr_array_add(sol->planes, plan_completo);
+    }
+    // Liberar memoria
+    g_free(g);
+    for (int i = 0; i <= plazo_proyecto; i++) {
+        g_ptr_array_free(planes_por_tiempo[i], TRUE);
+    }
+    g_free(planes_por_tiempo);
+    
+    return sol;
+}
 
 // --- LATEX
 void compile_latex_file(const gchar *tex_file) {
@@ -603,21 +667,11 @@ void on_select_latex_file_reemplazo(GtkButton *button, gpointer data) {
     GtkWidget *dialog;
     GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
     gint res;
-
-    dialog = gtk_file_chooser_dialog_new("Select LaTeX File",
-                                        GTK_WINDOW(windowReemplazo),
-                                        action,
-                                        "Cancel",
-                                        GTK_RESPONSE_CANCEL,
-                                        "Open",
-                                        GTK_RESPONSE_ACCEPT,
-                                        NULL);
-
+    dialog = gtk_file_chooser_dialog_new("Select LaTeX File", GTK_WINDOW(windowReemplazo), action, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL);
     GtkFileFilter *filter = gtk_file_filter_new();
     gtk_file_filter_set_name(filter, "LaTeX Files (*.tex)");
     gtk_file_filter_add_pattern(filter, "*.tex");
     gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
-
     gchar *reports_dir = g_build_filename(g_get_current_dir(), "ReportsEquipment", NULL);
     if (g_file_test(reports_dir, G_FILE_TEST_IS_DIR)) {
         gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), reports_dir);
@@ -693,25 +747,240 @@ void on_select_latex_file_reemplazo(GtkButton *button, gpointer data) {
     gtk_widget_destroy(dialog);
 }
 
+// --- Generación de LaTeX ---
+void generar_reporte_latex_corregido(Equipment *e, int vida_util, SolucionReemplazo *sol, const char *filename) {
+    gchar *dir = g_build_filename(g_get_current_dir(), "ReportsEquipment", NULL);
+    g_mkdir_with_parents(dir, 0755);
+    
+    gchar *tex_path = g_build_filename(dir, filename, NULL);
+    
+    FILE *f = fopen(tex_path, "w");
+    if (!f) {
+        g_printerr("No se pudo crear el archivo LaTeX: %s\n", tex_path);
+        g_free(dir);
+        g_free(tex_path);
+        return;
+    }
+    
+    int vida_util_ajustada = (vida_util > e->n) ? e->n : vida_util;
+    
+    // Encabezado del documento LaTeX
+    fprintf(f, "\\documentclass[12pt]{article}\n");
+    fprintf(f, "\\usepackage[spanish]{babel}\n");
+    fprintf(f, "\\usepackage[utf8]{inputenc}\n");
+    fprintf(f, "\\usepackage{amsmath}\n");
+    fprintf(f, "\\usepackage{graphicx}\n");
+    fprintf(f, "\\usepackage{booktabs}\n");
+    fprintf(f, "\\usepackage{array}\n");
+    fprintf(f, "\\usepackage{multirow}\n");
+    fprintf(f, "\\usepackage{float}\n");
+    fprintf(f, "\\usepackage{longtable}\n");
+    fprintf(f, "\\title{Proyecto 3: Reemplazo de Equipos}\n");
+    fprintf(f, "\\author{Emily Sanchez \\\\ Viviana Vargas \\\\[1cm] Curso: Investigación de Operaciones \\\\ II Semestre 2025}\n");
+    fprintf(f, "\\date{\\today}\n\n");
+    
+    fprintf(f, "\\begin{document}\n\n");
+    
+    // Portada
+    fprintf(f, "\\maketitle\n");
+    fprintf(f, "\\newpage\n");
+    
+    // Sección 1: Descripción del problema
+    fprintf(f, "\\section*{Problema de Reemplazo de Equipos}\n");
+    fprintf(f, "El problema consiste en determinar el momento óptimo para reemplazar un equipo durante un período de planificación.\\\\\n");
+    fprintf(f, "\\textbf{Fórmula del costo:} $C_{t,j} = \\text{Compra} + \\sum_{k=1}^{j-t} \\text{Mantenimiento}_k - \\text{Venta}_{j-t}$\\\\\n");
+    fprintf(f, "\\textbf{Algoritmo:} Programación Dinámica hacia atrás\\\\\n");
+    fprintf(f, "\\textbf{Función recursiva:} $g(t) = \\min\\limits_{j=t+1}^{\\min(t+\\text{vida útil}, n)} \\{C_{t,j} + g(j)\\}$ con $g(n) = 0$\\\\\n\n");
+    
+    // Sección 2: Datos del problema
+    fprintf(f, "\\section*{Datos del Problema}\n");
+    fprintf(f, "\\begin{itemize}\n");
+    fprintf(f, "\\item Costo inicial (compra): \\$%.2f\n", e->costo[0]);
+    fprintf(f, "\\item Plazo del proyecto: %d años\n", e->n);
+    fprintf(f, "\\item Vida útil del equipo: %d años\n", vida_util);
+    fprintf(f, "\\end{itemize}\n\n");
+    
+    fprintf(f, "\\begin{table}[H]\n");
+    fprintf(f, "\\centering\n");
+    fprintf(f, "\\caption{Datos del equipo por año de uso}\n");
+    fprintf(f, "\\begin{tabular}{ccc}\n");
+    fprintf(f, "\\toprule\n");
+    fprintf(f, "Año de Uso & Mantenimiento & Valor Residual \\\\\n");
+    fprintf(f, "\\midrule\n");
+    for (int i = 0; i < e->n && i < vida_util_ajustada; i++) {
+        fprintf(f, "%d & \\$%.2f & \\$%.2f \\\\\n", 
+                i + 1, e->costo_mant[i], e->valor_residual[i]);
+    }
+    fprintf(f, "\\bottomrule\n");
+    fprintf(f, "\\end{tabular}\n");
+    fprintf(f, "\\end{table}\n\n");
+    
+    // Sección 3: Cálculo de costos C(t,j) 
+    fprintf(f, "\\clearpage\n");
+    fprintf(f, "\\section*{Cálculo de Costos $C_{t,j}$}\n");
+    
+    fprintf(f, "\\begin{longtable}{cccc}\n");
+    fprintf(f, "\\caption{Cálculo detallado de costos por período}\\\\\n");
+    fprintf(f, "\\toprule\n");
+    fprintf(f, "Período (t-j) & Duración & Fórmula & Costo \\\\\n");
+    fprintf(f, "\\midrule\n");
+    fprintf(f, "\\endfirsthead\n");
+    
+    for (int t = 0; t < e->n; t++) {
+        for (int j = t + 1; j <= e->n; j++) {
+            int duracion = j - t;
+            if (duracion <= vida_util_ajustada) {
+                double costo = calcular_costo_periodo_correcto(e, t, j, vida_util);
+                fprintf(f, "%d-%d & %d año%s & $%.0f", t, j, duracion, duracion > 1 ? "s" : "", e->costo[0]);
+                for (int k = 0; k < duracion; k++) {
+                    if (k < e->n) {
+                        fprintf(f, " + %.0f", e->costo_mant[k]);
+                    }
+                }
+                fprintf(f, " - %.0f$ & \\$%.2f \\\\\n", e->valor_residual[duracion - 1], costo);
+            }
+        }
+    }
+    fprintf(f, "\\bottomrule\n");
+    fprintf(f, "\\end{longtable}\n\n");
+    
+    // Sección 4: Cálculo paso a paso de g(t)
+    fprintf(f, "\\clearpage\n");
+    fprintf(f, "\\section*{Cálculo de $g(t)$ (Programación Dinámica)}\n");
+    fprintf(f, "\\begin{itemize}\n");
+    fprintf(f, "\\item $g(%d) = 0$ (caso base)\n", e->n);
+    
+    double *g_calculado = g_new0(double, e->n + 1);
+    g_calculado[e->n] = 0.0;
+    
+    for (int t = e->n - 1; t >= 0; t--) {
+        fprintf(f, "\\item $g(%d) = \\min\\{ ", t);
+        
+        double min_costo = 1e20;
+        int count = 0;
+        
+        for (int j = t + 1; j <= e->n; j++) {
+            int duracion = j - t;
+            if (duracion <= vida_util_ajustada) {
+                double costo_periodo = calcular_costo_periodo_correcto(e, t, j, vida_util);
+                double costo_total = costo_periodo + g_calculado[j];
+                
+                if (count > 0) fprintf(f, ", ");
+                fprintf(f, "C_{%d,%d} + g(%d) = %.2f", t, j, j, costo_total);
+                
+                if (costo_total < min_costo) {
+                    min_costo = costo_total;
+                }
+                count++;
+            }
+        }
+        
+        g_calculado[t] = min_costo;
+        fprintf(f, "\\} = \\$%.2f$\n", min_costo);
+    }
+    fprintf(f, "\\end{itemize}\n\n");
+    g_free(g_calculado);
+    
+    fprintf(f, "\\clearpage\n");
+    fprintf(f, "\\section*{Solución Óptima}\n");
+    fprintf(f, "\\textbf{Costo mínimo total:} \\$%.2f\\\\\n", sol->costo_minimo);
+    fprintf(f, "\\textbf{Planes óptimos:}\\\\\n");
+    
+    if (sol->planes->len > 0) {
+        fprintf(f, "\\begin{itemize}\n");
+        for (guint i = 0; i < sol->planes->len; i++) {
+            char *plan = (char*)g_ptr_array_index(sol->planes, i);
+            fprintf(f, "\\item %s\n", plan);
+        }
+        fprintf(f, "\\end{itemize}\n");
+    } else {
+        fprintf(f, "No se encontraron planes óptimos.\\\\\n");
+    }
+    
+    // Tabla resumen de g(t)
+    fprintf(f, "\\begin{table}[H]\n");
+    fprintf(f, "\\centering\n");
+    fprintf(f, "\\caption{Resumen de costos mínimos}\n");
+    fprintf(f, "\\begin{tabular}{cc}\n");
+    fprintf(f, "\\toprule\n");
+    fprintf(f, "Año (t) & Costo Mínimo $g(t)$ \\\\\n");
+    fprintf(f, "\\midrule\n");
+    
+    double *g_final = g_new0(double, e->n + 1);
+    g_final[e->n] = 0.0;
+    
+    for (int t = e->n - 1; t >= 0; t--) {
+        g_final[t] = 1e20;
+        for (int j = t + 1; j <= e->n; j++) {
+            if (j - t <= vida_util_ajustada) {
+                double costo = calcular_costo_periodo_correcto(e, t, j, vida_util) + g_final[j];
+                if (costo < g_final[t]) {
+                    g_final[t] = costo;
+                }
+            }
+        }
+        fprintf(f, "%d & \\$%.2f \\\\\n", t, g_final[t]);
+    }
+    fprintf(f, "\\bottomrule\n");
+    fprintf(f, "\\end{tabular}\n");
+    fprintf(f, "\\end{table}\n\n");
+    
+    g_free(g_final);
+    
+    fprintf(f, "\\end{document}\n");
+    fclose(f);
+    
+    g_free(dir);
+    g_free(tex_path);
+}
+
 void on_exit_reemplazo_clicked(GtkButton *button, gpointer data) {
     gtk_main_quit();
 }
 
+// Función crear solucion
 void on_calc_reemplazo_clicked(GtkButton *button, gpointer data) {
     Equipment e;
     if (!read_table(&e)) return;
 
-    free_dp_and_decisions(e.n, (int)e.W);
-
-
-    double best = equipo_replacement_algorithm(
-        e.n, e.costo, e.valor_residual, e.costo_mant, e.beneficio, e.W
-    );
-
+    int plazo_proyecto = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(vidaSpin));
+    int vida_util_equipo = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(plazoSpin));
+    e.n = plazo_proyecto; 
+    SolucionReemplazo *sol = equipo_replacement_algorithm_corregido(&e, vida_util_equipo);
+    const gchar *nombre_archivo = NULL;
+    if (fileNameReemplazo && GTK_IS_ENTRY(fileNameReemplazo)) {
+        nombre_archivo = gtk_entry_get_text(GTK_ENTRY(fileNameReemplazo));
+    }    
+    gchar *nombre_base = NULL;
+    if (nombre_archivo && *nombre_archivo) {
+        if (g_str_has_suffix(nombre_archivo, ".csv") || g_str_has_suffix(nombre_archivo, ".tex")) {
+            gchar *temp = g_strndup(nombre_archivo, strlen(nombre_archivo) - 4);
+            nombre_base = g_strdup(temp);
+            g_free(temp);
+        } else {
+            nombre_base = g_strdup(nombre_archivo);
+        }
+    } else {
+        nombre_base = g_strdup("reporte_reemplazo");
+    }
+    gchar *nombre_tex = g_strconcat(nombre_base, ".tex", NULL);
+    gchar *nombre_csv = g_strconcat(nombre_base, ".csv", NULL);
+    generar_reporte_latex_corregido(&e, vida_util_equipo, sol, nombre_tex);
+    
+    // Guardar CSV
     gchar *path = set_path_csv();
     gboolean saved = save_to_csv(path);
-
+    
+    // Compilar y mostrar PDF
+    gchar *tex_file = g_build_filename(g_get_current_dir(), "ReportsEquipment", "reporte_reemplazo.tex", NULL);
+    compile_latex_file(tex_file);
+    
+    // Liberar memoria
+    g_ptr_array_free(sol->planes, TRUE);
+    g_free(sol);
     g_free(path);
+    g_free(tex_file);
+    free_equipment(&e);
 }
 
 void on_vida_changed(GtkSpinButton *spin, gpointer data) {

@@ -93,7 +93,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkSpinButton" id="plazoSpin">
+          <object class="GtkSpinButton" id="plazSpin">
             <property name="width-request">123</property>
             <property name="height-request">37</property>
             <property name="visible">True</property>
