@@ -1,4 +1,3 @@
-
 /* Proyecto 3 IO - Reemplazo de Equipos
    Estudiantes:
    Emily Sánchez -
@@ -58,8 +57,6 @@ typedef struct {
     int proximo_reemplazo;
     GPtrArray *planes; // Array de posibles planes óptimos
 } SolucionReemplazo;
-
-
 
 void set_css(GtkCssProvider *cssProvider, GtkWidget *widget);
 
@@ -635,21 +632,19 @@ SolucionReemplazo* equipo_replacement_algorithm_corregido(Equipment *e, int vida
 }
 
 // Función para crear un grafo de saltos de rana
-gboolean generar_grafo_saltos_rana(const char *plan_optimo, const char *filename) {
-    if (!plan_optimo || !filename) return FALSE;
+gboolean generar_grafo_saltos_rana_completo(const char *plan_optimo, const char *filename, int año_maximo) {
+    if (!plan_optimo || !filename) return FALSE;    
     
-    // Parsear el plan óptimo (ejemplo: "0-2-4-6")
     gchar **saltos = g_strsplit(plan_optimo, "-", -1);
     if (!saltos || !saltos[0]) {
         g_strfreev(saltos);
         return FALSE;
     }
     
-    // Contar número de saltos
-    int num_nodos = 0;
-    while (saltos[num_nodos] != NULL) num_nodos++;
+    int num_nodos_plan = 0;
+    while (saltos[num_nodos_plan] != NULL) num_nodos_plan++;
     
-    if (num_nodos < 2) {
+    if (num_nodos_plan < 2) {
         g_strfreev(saltos);
         return FALSE;
     }
@@ -669,36 +664,79 @@ gboolean generar_grafo_saltos_rana(const char *plan_optimo, const char *filename
     fprintf(dot_file, "    node [shape=circle, style=filled, fillcolor=lightblue, fontname=Arial];\n");
     fprintf(dot_file, "    edge [color=darkgreen, arrowhead=vee, arrowsize=0.8];\n\n");
     
-    // Agregar nodos
-    for (int i = 0; i < num_nodos; i++) {
-        if (i == 0) {
-            fprintf(dot_file, "    \"%s\" [fillcolor=green, fontcolor=white];\n", saltos[i]);
-        } else if (i == num_nodos - 1) {
-            fprintf(dot_file, "    \"%s\" [fillcolor=red, fontcolor=white];\n", saltos[i]);
+    // Crear todos los nodos desde 0 hasta año_maximo
+    for (int i = 0; i <= año_maximo; i++) {
+        gchar nodo_str[10];
+        g_snprintf(nodo_str, sizeof(nodo_str), "%d", i);
+        
+        // Verificar si este nodo está en el plan óptimo
+        gboolean en_plan = FALSE;
+        int posicion_en_plan = -1;
+        
+        for (int j = 0; j < num_nodos_plan; j++) {
+            if (atoi(saltos[j]) == i) {
+                en_plan = TRUE;
+                posicion_en_plan = j;
+                break;
+            }
+        }
+        
+        if (en_plan) {
+            if (posicion_en_plan == 0) {
+                // Nodo inicial
+                fprintf(dot_file, "    \"%d\" [fillcolor=green, fontcolor=white];\n", i);
+            } else if (posicion_en_plan == num_nodos_plan - 1) {
+                // Nodo final
+                fprintf(dot_file, "    \"%d\" [fillcolor=red, fontcolor=white];\n", i);
+            } else {
+                // Nodo intermedio del plan
+                fprintf(dot_file, "    \"%d\" [fillcolor=orange];\n", i);
+            }
         } else {
-            fprintf(dot_file, "    \"%s\";\n", saltos[i]);
+            // Nodo no utilizado en el plan (color más tenue)
+            fprintf(dot_file, "    \"%d\" [fillcolor=lightgray, color=gray, fontcolor=gray];\n", i);
         }
     }
     
-    // Agregar aristas (saltos)
     fprintf(dot_file, "\n");
-    for (int i = 0; i < num_nodos - 1; i++) {
+    
+    // Crear conexiones del plan óptimo (en verde y más gruesas)
+    for (int i = 0; i < num_nodos_plan - 1; i++) {
         int inicio = atoi(saltos[i]);
         int fin = atoi(saltos[i+1]);
         int duracion = fin - inicio;
         
-        fprintf(dot_file, "    \"%s\" -> \"%s\" [label=\"%d año%s\", fontsize=10];\n", 
-                saltos[i], saltos[i+1], duracion, duracion > 1 ? "s" : "");
+        fprintf(dot_file, "    \"%d\" -> \"%d\" [label=\"%d año%s\", fontsize=10, color=darkgreen, penwidth=2.0];\n", 
+                inicio, fin, duracion, duracion > 1 ? "s" : "");
+    }
+    
+    // Crear conexiones implícitas entre nodos consecutivos no utilizados (en gris y punteadas)
+    for (int i = 0; i < año_maximo; i++) {
+        gboolean conexion_existe = FALSE;
+        
+        // Verificar si ya existe una conexión en el plan óptimo
+        for (int j = 0; j < num_nodos_plan - 1; j++) {
+            int inicio_plan = atoi(saltos[j]);
+            int fin_plan = atoi(saltos[j+1]);
+            
+            if (inicio_plan == i && fin_plan == i + 1) {
+                conexion_existe = TRUE;
+                break;
+            }
+        }
+        
+        // Solo crear conexión punteada si no existe en el plan óptimo
+        if (!conexion_existe) {
+            fprintf(dot_file, "    \"%d\" -> \"%d\" [style=dotted, color=gray, arrowhead=empty, arrowsize=0.5, constraint=false];\n", i, i + 1);
+        }
     }
     
     fprintf(dot_file, "}\n");
     fclose(dot_file);
     
-    // Generar imagen PNG usando Graphviz
+    // Generar imágenes PNG y PDF
     gchar *cmd = g_strdup_printf("dot -Tpng -o\"%s.png\" \"%s\"", filename, dot_filename);
     int result = system(cmd);
-    
-    // También generar PDF para LaTeX
     gchar *cmd_pdf = g_strdup_printf("dot -Tpdf -o\"%s.pdf\" \"%s\"", filename, dot_filename);
     int result_pdf = system(cmd_pdf);
     
@@ -710,7 +748,6 @@ gboolean generar_grafo_saltos_rana(const char *plan_optimo, const char *filename
     
     return (result == 0 && result_pdf == 0);
 }
-
 // --- LATEX
 void compile_latex_file(const gchar *tex_file) {
     gchar *dir = g_path_get_dirname(tex_file);
@@ -870,9 +907,21 @@ void generar_reporte_latex_corregido(Equipment *e, int vida_util, SolucionReempl
     
     // Sección 1: Descripción del problema
     fprintf(f, "\\section*{Problema de Reemplazo de Equipos}\n");
-    fprintf(f, "El problema consiste en determinar el momento óptimo para reemplazar un equipo durante un período de planificación.\\\\\n");
+    fprintf(f, "El algoritmo de reemplazo de equipos se utiliza en Investigación de Operaciones para decidir cuándo conviene reemplazar una máquina o equipo que se deteriora con el tiempo.\\\\\n");
+    fprintf(f, "La idea básica es comparar dos tipos de costos:\\\\\n");
+    fprintf(f, "\\begin{itemize}\n");
+    fprintf(f, "\\item \\textbf{Costo de mantener el equipo actual:} Incluye reparaciones, mantenimiento y costos de operación, que normalmente aumentan con los años de uso.\\\\\n");
+    fprintf(f, "\\item \\textbf{Costo de reemplazarlo por uno nuevo:} Incluye el costo inicial de adquisición y el valor de rescate (lo obtenido al vender el equipo viejo).\\\\\n");
+    fprintf(f, "\\end{itemize}\n");
+    fprintf(f, "El objetivo es minimizar el costo promedio anual (o el valor presente de los costos) a lo largo del tiempo.\\\\\n");
+    fprintf(f, "\\textbf{Variaciones comunes del problema:}\\\\\n");
+    fprintf(f, "\\begin{itemize}\n");
+    fprintf(f, "\\item \\textbf{Ganancias por año:} La productividad del equipo disminuye con la edad, afectando los ingresos.\\\\\n");
+    fprintf(f, "\\item \\textbf{Inflación:} Los precios de adquisición y mantenimiento cambian según el año.\\\\\n");
+    fprintf(f, "\\item \\textbf{Nuevas tecnologías:} Equipos más modernos pueden ofrecer mejores rendimientos y menores costos operativos.\\\\\n");
+    fprintf(f, "\\end{itemize}\n");
     fprintf(f, "\\textbf{Fórmula del costo:} $C_{t,j} = \\text{Compra} + \\sum_{k=1}^{j-t} \\text{Mantenimiento}_k - \\text{Venta}_{j-t}$\\\\\n");
-    fprintf(f, "\\textbf{Algoritmo:} Programación Dinámica hacia atrás\\\\\n");
+    fprintf(f, "\\textbf{Algoritmo:} Programación Dinámica \\\\\n");
     fprintf(f, "\\textbf{Función recursiva:} $g(t) = \\min\\limits_{j=t+1}^{\\min(t+\\text{vida útil}, n)} \\{C_{t,j} + g(j)\\}$ con $g(n) = 0$\\\\\n\n");
     
     // Sección 2: Datos del problema
@@ -939,15 +988,19 @@ void generar_reporte_latex_corregido(Equipment *e, int vida_util, SolucionReempl
     }
     fprintf(f, "\\end{longtable}\n\n");
     
-    // Sección 4: Cálculo paso a paso de g(t)
+    /// Sección 4: Cálculo de g(t) 
     fprintf(f, "\\clearpage\n");
     fprintf(f, "\\section*{Cálculo de $g(t)$ (Programación Dinámica)}\n");
     fprintf(f, "\\begin{itemize}\n");
     fprintf(f, "\\item $g(%d) = 0$ (caso base)\n", e->n);
-    
+
     double *g_calculado = g_new0(double, e->n + 1);
     g_calculado[e->n] = 0.0;
-    
+    GPtrArray **opciones_optimas = g_new0(GPtrArray*, e->n + 1);
+    for (int i = 0; i <= e->n; i++) {
+        opciones_optimas[i] = g_ptr_array_new();
+    }
+
     for (int t = e->n - 1; t >= 0; t--) {
         fprintf(f, "\\item $g(%d) = \\min\\{ ", t);
         
@@ -960,20 +1013,103 @@ void generar_reporte_latex_corregido(Equipment *e, int vida_util, SolucionReempl
                 double costo_periodo = calcular_costo_periodo_correcto(e, t, j, vida_util);
                 double costo_total = costo_periodo + g_calculado[j];
                 
-                if (count > 0) fprintf(f, ", ");
-                fprintf(f, "C_{%d,%d} + g(%d) = %.2f", t, j, j, costo_total);
-                
-                if (costo_total < min_costo) {
+                if (costo_total < min_costo - 1e-10) { 
                     min_costo = costo_total;
+                    g_ptr_array_set_size(opciones_optimas[t], 0);
+                    int *j_optimo = g_new(int, 1);
+                    *j_optimo = j;
+                    g_ptr_array_add(opciones_optimas[t], j_optimo);
+                } else if (fabs(costo_total - min_costo) < 1e-10) {
+                    int *j_optimo = g_new(int, 1);
+                    *j_optimo = j;
+                    g_ptr_array_add(opciones_optimas[t], j_optimo);
                 }
+            }
+        }
+        for (int j = t + 1; j <= e->n; j++) {
+            int duracion = j - t;
+            if (duracion <= vida_util_ajustada) {
+                double costo_periodo = calcular_costo_periodo_correcto(e, t, j, vida_util);
+                double costo_total = costo_periodo + g_calculado[j];
+                
+                if (count > 0) fprintf(f, ", ");
+                gboolean es_optima = FALSE;
+                for (guint k = 0; k < opciones_optimas[t]->len; k++) {
+                    int *j_opt = (int*)g_ptr_array_index(opciones_optimas[t], k);
+                    if (*j_opt == j) {
+                        es_optima = TRUE;
+                        break;
+                    }
+                }
+                
+                if (es_optima) {
+                    fprintf(f, "\\mathbf{C_{%d,%d} + g(%d) = %.2f}", t, j, j, costo_total);
+                } else {
+                    fprintf(f, "C_{%d,%d} + g(%d) = %.2f", t, j, j, costo_total);
+                }
+                
                 count++;
             }
         }
         
         g_calculado[t] = min_costo;
-        fprintf(f, "\\} = \\$%.2f$\n", min_costo);
+        
+        // Reportar empates si existen
+        if (opciones_optimas[t]->len > 1) {
+            fprintf(f, "\\} = \\$%.2f$ \\textbf{(Empate: ", min_costo);
+            for (guint k = 0; k < opciones_optimas[t]->len; k++) {
+                int *j_opt = (int*)g_ptr_array_index(opciones_optimas[t], k);
+                if (k > 0) fprintf(f, ", ");
+                fprintf(f, "j=%d", *j_opt);
+            }
+            fprintf(f, ")}\n");
+        } else if (opciones_optimas[t]->len == 1) {
+            int *j_opt = (int*)g_ptr_array_index(opciones_optimas[t], 0);
+            fprintf(f, "\\} = \\$%.2f$ \\textbf{(j=%d)}\n", min_costo, *j_opt);
+        } else {
+            fprintf(f, "\\} = \\$%.2f$\n", min_costo);
+        }
     }
     fprintf(f, "\\end{itemize}\n\n");
+
+    // Agregar una sección explicativa sobre empates
+    fprintf(f, "\\subsection*{Empates}\n");
+    fprintf(f, "Se han resaltado en \\textbf{negrita} las opciones óptimas.\\\\\n");
+
+    gboolean hay_empates = FALSE;
+    for (int t = 0; t < e->n; t++) {
+        if (opciones_optimas[t]->len > 1) {
+            if (!hay_empates) {
+                fprintf(f, "\\textbf{Empates encontrados:}\n");
+                fprintf(f, "\\begin{itemize}\n");
+                hay_empates = TRUE;
+            }
+            fprintf(f, "\\item En $g(%d)$: múltiples opciones óptimas con j = ", t);
+            for (guint k = 0; k < opciones_optimas[t]->len; k++) {
+                int *j_opt = (int*)g_ptr_array_index(opciones_optimas[t], k);
+                if (k > 0) fprintf(f, ", ");
+                fprintf(f, "%d", *j_opt);
+            }
+            fprintf(f, " (costo: \\$%.2f)\n", g_calculado[t]);
+        }
+    }
+
+    if (hay_empates) {
+        fprintf(f, "\\end{itemize}\n");
+        fprintf(f, "Los empates indican que existen múltiples estrategias óptimas para reemplazar el equipo.\\\\\n");
+    } else {
+        fprintf(f, "\\textbf{No se encontraron empates.} Existe una única estrategia óptima para cada año de inicio.\\\\\n");
+    }
+
+    // Limpiar memoria
+    for (int i = 0; i <= e->n; i++) {
+        for (guint j = 0; j < opciones_optimas[i]->len; j++) {
+            int *j_opt = (int*)g_ptr_array_index(opciones_optimas[i], j);
+            g_free(j_opt);
+        }
+        g_ptr_array_free(opciones_optimas[i], TRUE);
+    }
+    g_free(opciones_optimas);
     g_free(g_calculado);
     
     fprintf(f, "\\clearpage\n");
@@ -993,7 +1129,7 @@ void generar_reporte_latex_corregido(Equipment *e, int vida_util, SolucionReempl
             
             gchar *nombre_grafo = g_strdup_printf("%s_plan_%d", base_nombre, i+1);
             gchar *ruta_grafo = g_build_filename(dir, nombre_grafo, NULL);
-            gboolean grafo_generado = generar_grafo_saltos_rana(plan, ruta_grafo);
+            gboolean grafo_generado = generar_grafo_saltos_rana_completo(plan, ruta_grafo, e->n);
             
             if (grafo_generado) {
                 fprintf(f, "\\begin{figure}[H]\n");

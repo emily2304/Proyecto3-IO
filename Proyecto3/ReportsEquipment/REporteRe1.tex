@@ -21,9 +21,21 @@
 \maketitle
 \newpage
 \section*{Problema de Reemplazo de Equipos}
-El problema consiste en determinar el momento óptimo para reemplazar un equipo durante un período de planificación.\\
+El algoritmo de reemplazo de equipos se utiliza en Investigación de Operaciones para decidir cuándo conviene reemplazar una máquina o equipo que se deteriora con el tiempo.\\
+La idea básica es comparar dos tipos de costos:\\
+\begin{itemize}
+\item \textbf{Costo de mantener el equipo actual:} Incluye reparaciones, mantenimiento y costos de operación, que normalmente aumentan con los años de uso.\\
+\item \textbf{Costo de reemplazarlo por uno nuevo:} Incluye el costo inicial de adquisición y el valor de rescate (lo obtenido al vender el equipo viejo).\\
+\end{itemize}
+El objetivo es minimizar el costo promedio anual (o el valor presente de los costos) a lo largo del tiempo.\\
+\textbf{Variaciones comunes del problema:}\\
+\begin{itemize}
+\item \textbf{Ganancias por año:} La productividad del equipo disminuye con la edad, afectando los ingresos.\\
+\item \textbf{Inflación:} Los precios de adquisición y mantenimiento cambian según el año.\\
+\item \textbf{Nuevas tecnologías:} Equipos más modernos pueden ofrecer mejores rendimientos y menores costos operativos.\\
+\end{itemize}
 \textbf{Fórmula del costo:} $C_{t,j} = \text{Compra} + \sum_{k=1}^{j-t} \text{Mantenimiento}_k - \text{Venta}_{j-t}$\\
-\textbf{Algoritmo:} Programación Dinámica hacia atrás\\
+\textbf{Algoritmo:} Programación Dinámica \\
 \textbf{Función recursiva:} $g(t) = \min\limits_{j=t+1}^{\min(t+\text{vida útil}, n)} \{C_{t,j} + g(j)\}$ con $g(n) = 0$\\
 
 \section*{Datos del Problema}
@@ -83,13 +95,21 @@ Período (t-j) & Duración & Fórmula & Costo \\
 \section*{Cálculo de $g(t)$ (Programación Dinámica)}
 \begin{itemize}
 \item $g(5) = 0$ (caso base)
-\item $g(4) = \min\{ C_{4,5} + g(5) = 130,00\} = \$130,00$
-\item $g(3) = \min\{ C_{3,4} + g(4) = 260,00, C_{3,5} + g(5) = 270,00\} = \$260,00$
-\item $g(2) = \min\{ C_{2,3} + g(3) = 390,00, C_{2,4} + g(4) = 400,00, C_{2,5} + g(5) = 380,00\} = \$380,00$
-\item $g(1) = \min\{ C_{1,2} + g(2) = 510,00, C_{1,3} + g(3) = 530,00, C_{1,4} + g(4) = 510,00\} = \$510,00$
-\item $g(0) = \min\{ C_{0,1} + g(1) = 640,00, C_{0,2} + g(2) = 650,00, C_{0,3} + g(3) = 640,00\} = \$640,00$
+\item $g(4) = \min\{ \mathbf{C_{4,5} + g(5) = 130,00}\} = \$130,00$ \textbf{(j=5)}
+\item $g(3) = \min\{ \mathbf{C_{3,4} + g(4) = 260,00}, C_{3,5} + g(5) = 270,00\} = \$260,00$ \textbf{(j=4)}
+\item $g(2) = \min\{ C_{2,3} + g(3) = 390,00, C_{2,4} + g(4) = 400,00, \mathbf{C_{2,5} + g(5) = 380,00}\} = \$380,00$ \textbf{(j=5)}
+\item $g(1) = \min\{ \mathbf{C_{1,2} + g(2) = 510,00}, C_{1,3} + g(3) = 530,00, \mathbf{C_{1,4} + g(4) = 510,00}\} = \$510,00$ \textbf{(Empate: j=2, j=4)}
+\item $g(0) = \min\{ \mathbf{C_{0,1} + g(1) = 640,00}, C_{0,2} + g(2) = 650,00, \mathbf{C_{0,3} + g(3) = 640,00}\} = \$640,00$ \textbf{(Empate: j=1, j=3)}
 \end{itemize}
 
+\subsection*{Empates}
+Se han resaltado en \textbf{negrita} las opciones óptimas.\\
+\textbf{Empates encontrados:}
+\begin{itemize}
+\item En $g(0)$: múltiples opciones óptimas con j = 1, 3 (costo: \$640,00)
+\item En $g(1)$: múltiples opciones óptimas con j = 2, 4 (costo: \$510,00)
+\end{itemize}
+Los empates indican que existen múltiples estrategias óptimas para reemplazar el equipo.\\
 \clearpage
 \section*{Solución Óptima}
 \textbf{Costo mínimo total:} \$640,00\\
