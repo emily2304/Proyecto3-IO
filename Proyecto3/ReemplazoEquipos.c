@@ -713,7 +713,7 @@ gboolean generar_grafo_saltos_rana_completo(const char *plan_optimo, const char 
             }
         } else {
             // Nodo no utilizado en el plan (color más tenue)
-            fprintf(dot_file, "    \"%d\" [fillcolor=lightgray, color=gray, fontcolor=gray];\n", i);
+            fprintf(dot_file, "    \"%d\" [fillcolor=lightgray, color=gray, fontcolor=black];\n", i);
         }
     }
     
