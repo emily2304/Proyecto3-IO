@@ -14,6 +14,8 @@
 #include <stdbool.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <cairo/cairo.h>
+#include <cairo/cairo-pdf.h>
 
 GtkWidget *windowReemplazo;
 GtkWidget *costoEntry;
@@ -632,6 +634,83 @@ SolucionReemplazo* equipo_replacement_algorithm_corregido(Equipment *e, int vida
     return sol;
 }
 
+// Función para crear un grafo de saltos de rana
+gboolean generar_grafo_saltos_rana(const char *plan_optimo, const char *filename) {
+    if (!plan_optimo || !filename) return FALSE;
+    
+    // Parsear el plan óptimo (ejemplo: "0-2-4-6")
+    gchar **saltos = g_strsplit(plan_optimo, "-", -1);
+    if (!saltos || !saltos[0]) {
+        g_strfreev(saltos);
+        return FALSE;
+    }
+    
+    // Contar número de saltos
+    int num_nodos = 0;
+    while (saltos[num_nodos] != NULL) num_nodos++;
+    
+    if (num_nodos < 2) {
+        g_strfreev(saltos);
+        return FALSE;
+    }
+    
+    // Crear archivo DOT para Graphviz
+    gchar *dot_filename = g_strconcat(filename, ".dot", NULL);
+    FILE *dot_file = fopen(dot_filename, "w");
+    if (!dot_file) {
+        g_free(dot_filename);
+        g_strfreev(saltos);
+        return FALSE;
+    }
+    
+    // Escribir archivo DOT
+    fprintf(dot_file, "digraph PlanOptimo {\n");
+    fprintf(dot_file, "    rankdir=LR;\n");
+    fprintf(dot_file, "    node [shape=circle, style=filled, fillcolor=lightblue, fontname=Arial];\n");
+    fprintf(dot_file, "    edge [color=darkgreen, arrowhead=vee, arrowsize=0.8];\n\n");
+    
+    // Agregar nodos
+    for (int i = 0; i < num_nodos; i++) {
+        if (i == 0) {
+            fprintf(dot_file, "    \"%s\" [fillcolor=green, fontcolor=white];\n", saltos[i]);
+        } else if (i == num_nodos - 1) {
+            fprintf(dot_file, "    \"%s\" [fillcolor=red, fontcolor=white];\n", saltos[i]);
+        } else {
+            fprintf(dot_file, "    \"%s\";\n", saltos[i]);
+        }
+    }
+    
+    // Agregar aristas (saltos)
+    fprintf(dot_file, "\n");
+    for (int i = 0; i < num_nodos - 1; i++) {
+        int inicio = atoi(saltos[i]);
+        int fin = atoi(saltos[i+1]);
+        int duracion = fin - inicio;
+        
+        fprintf(dot_file, "    \"%s\" -> \"%s\" [label=\"%d año%s\", fontsize=10];\n", 
+                saltos[i], saltos[i+1], duracion, duracion > 1 ? "s" : "");
+    }
+    
+    fprintf(dot_file, "}\n");
+    fclose(dot_file);
+    
+    // Generar imagen PNG usando Graphviz
+    gchar *cmd = g_strdup_printf("dot -Tpng -o\"%s.png\" \"%s\"", filename, dot_filename);
+    int result = system(cmd);
+    
+    // También generar PDF para LaTeX
+    gchar *cmd_pdf = g_strdup_printf("dot -Tpdf -o\"%s.pdf\" \"%s\"", filename, dot_filename);
+    int result_pdf = system(cmd_pdf);
+    
+    // Limpiar
+    g_free(cmd);
+    g_free(cmd_pdf);
+    g_free(dot_filename);
+    g_strfreev(saltos);
+    
+    return (result == 0 && result_pdf == 0);
+}
+
 // --- LATEX
 void compile_latex_file(const gchar *tex_file) {
     gchar *dir = g_path_get_dirname(tex_file);
@@ -775,6 +854,10 @@ void generar_reporte_latex_corregido(Equipment *e, int vida_util, SolucionReempl
     fprintf(f, "\\usepackage{multirow}\n");
     fprintf(f, "\\usepackage{float}\n");
     fprintf(f, "\\usepackage{longtable}\n");
+    fprintf(f, "\\usepackage{subcaption}\n");
+    fprintf(f, "\\usepackage{wrapfig}\n");
+    fprintf(f, "\\usepackage{tikz}\n");
+    fprintf(f, "\\usetikzlibrary{arrows.meta, positioning, shapes.geometric}\n");
     fprintf(f, "\\title{Proyecto 3: Reemplazo de Equipos}\n");
     fprintf(f, "\\author{Emily Sanchez \\\\ Viviana Vargas \\\\[1cm] Curso: Investigación de Operaciones \\\\ II Semestre 2025}\n");
     fprintf(f, "\\date{\\today}\n\n");
@@ -820,11 +903,24 @@ void generar_reporte_latex_corregido(Equipment *e, int vida_util, SolucionReempl
     fprintf(f, "\\section*{Cálculo de Costos $C_{t,j}$}\n");
     
     fprintf(f, "\\begin{longtable}{cccc}\n");
-    fprintf(f, "\\caption{Cálculo detallado de costos por período}\\\\\n");
+    fprintf(f, "\\caption{Cálculo detallado de costos por período} \\\\\n");
     fprintf(f, "\\toprule\n");
     fprintf(f, "Período (t-j) & Duración & Fórmula & Costo \\\\\n");
     fprintf(f, "\\midrule\n");
     fprintf(f, "\\endfirsthead\n");
+
+    fprintf(f, "\\multicolumn{4}{c}{\\tablename\\ \\thetable\\ -- Continúa} \\\\\n");
+    fprintf(f, "\\toprule\n");
+    fprintf(f, "Período (t-j) & Duración & Fórmula & Costo \\\\\n");
+    fprintf(f, "\\midrule\n");
+    fprintf(f, "\\endhead\n");
+
+    fprintf(f, "\\midrule\n");
+    fprintf(f, "\\multicolumn{4}{r}{Continúa en la siguiente página} \\\\\n");
+    fprintf(f, "\\endfoot\n");
+
+    fprintf(f, "\\bottomrule\n");
+    fprintf(f, "\\endlastfoot\n");
     
     for (int t = 0; t < e->n; t++) {
         for (int j = t + 1; j <= e->n; j++) {
@@ -841,7 +937,6 @@ void generar_reporte_latex_corregido(Equipment *e, int vida_util, SolucionReempl
             }
         }
     }
-    fprintf(f, "\\bottomrule\n");
     fprintf(f, "\\end{longtable}\n\n");
     
     // Sección 4: Cálculo paso a paso de g(t)
@@ -884,48 +979,57 @@ void generar_reporte_latex_corregido(Equipment *e, int vida_util, SolucionReempl
     fprintf(f, "\\clearpage\n");
     fprintf(f, "\\section*{Solución Óptima}\n");
     fprintf(f, "\\textbf{Costo mínimo total:} \\$%.2f\\\\\n", sol->costo_minimo);
-    fprintf(f, "\\textbf{Planes óptimos:}\\\\\n");
+    fprintf(f, "\\textbf{Planes óptimos encontrados:} %d\n", sol->planes->len);
+
     
     if (sol->planes->len > 0) {
-        fprintf(f, "\\begin{itemize}\n");
+        gchar *base_nombre = g_strndup(filename, strlen(filename) - 4); 
+        
+        fprintf(f, "\\subsection*{Grafos de Planes Óptimos}\n");
+        fprintf(f, "A continuación se presentan los grafos de \\emph{saltos de rana} para cada plan óptimo encontrado.\n\n");
+
         for (guint i = 0; i < sol->planes->len; i++) {
             char *plan = (char*)g_ptr_array_index(sol->planes, i);
-            fprintf(f, "\\item %s\n", plan);
-        }
-        fprintf(f, "\\end{itemize}\n");
-    } else {
-        fprintf(f, "No se encontraron planes óptimos.\\\\\n");
-    }
-    
-    // Tabla resumen de g(t)
-    fprintf(f, "\\begin{table}[H]\n");
-    fprintf(f, "\\centering\n");
-    fprintf(f, "\\caption{Resumen de costos mínimos}\n");
-    fprintf(f, "\\begin{tabular}{cc}\n");
-    fprintf(f, "\\toprule\n");
-    fprintf(f, "Año (t) & Costo Mínimo $g(t)$ \\\\\n");
-    fprintf(f, "\\midrule\n");
-    
-    double *g_final = g_new0(double, e->n + 1);
-    g_final[e->n] = 0.0;
-    
-    for (int t = e->n - 1; t >= 0; t--) {
-        g_final[t] = 1e20;
-        for (int j = t + 1; j <= e->n; j++) {
-            if (j - t <= vida_util_ajustada) {
-                double costo = calcular_costo_periodo_correcto(e, t, j, vida_util) + g_final[j];
-                if (costo < g_final[t]) {
-                    g_final[t] = costo;
+            
+            gchar *nombre_grafo = g_strdup_printf("%s_plan_%d", base_nombre, i+1);
+            gchar *ruta_grafo = g_build_filename(dir, nombre_grafo, NULL);
+            gboolean grafo_generado = generar_grafo_saltos_rana(plan, ruta_grafo);
+            
+            if (grafo_generado) {
+                fprintf(f, "\\begin{figure}[H]\n");
+                fprintf(f, "\\centering\n");
+                fprintf(f, "\\includegraphics[width=0.8\\textwidth]{%s.png}\n", nombre_grafo);
+                fprintf(f, "\\caption{Plan Óptimo %d: \\texttt{%s}}\n", i+1, plan);
+                fprintf(f, "\\label{fig:plan%d}\n", i+1);
+                fprintf(f, "\\end{figure}\n\n");
+                fprintf(f, "\\textbf{Plan %d:} \\texttt{%s}\n", i+1, plan);
+                
+                // Análisis detallado del plan
+                gchar **saltos = g_strsplit(plan, "-", -1);
+                if (saltos) {
+                    fprintf(f, "\\begin{itemize}\\small\n");
+                    for (int j = 0; saltos[j] && saltos[j+1]; j++) {
+                        int inicio = atoi(saltos[j]);
+                        int fin = atoi(saltos[j+1]);
+                        int duracion = fin - inicio;
+                        double costo = calcular_costo_periodo_correcto(e, inicio, fin, vida_util);
+                        fprintf(f, "\\item Período %d-%d: %d año%s, Costo: \\$%.2f\n", inicio, fin, duracion, duracion > 1 ? "s" : "", costo);
+
+                    }
+                    fprintf(f, "\\end{itemize}\n");
+                    g_strfreev(saltos);
                 }
+                fprintf(f, "\n");
             }
+            
+            g_free(nombre_grafo);
+            g_free(ruta_grafo);
         }
-        fprintf(f, "%d & \\$%.2f \\\\\n", t, g_final[t]);
+        
+        g_free(base_nombre);
+    } else {
+        fprintf(f, "No se encontraron planes óptimos.\n");
     }
-    fprintf(f, "\\bottomrule\n");
-    fprintf(f, "\\end{tabular}\n");
-    fprintf(f, "\\end{table}\n\n");
-    
-    g_free(g_final);
     
     fprintf(f, "\\end{document}\n");
     fclose(f);
@@ -938,19 +1042,19 @@ void on_exit_reemplazo_clicked(GtkButton *button, gpointer data) {
     gtk_main_quit();
 }
 
-// Función crear solucion
+
 void on_calc_reemplazo_clicked(GtkButton *button, gpointer data) {
     Equipment e;
     if (!read_table(&e)) return;
-
     int plazo_proyecto = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(vidaSpin));
     int vida_util_equipo = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(plazoSpin));
-    e.n = plazo_proyecto; 
+    e.n = plazo_proyecto;
     SolucionReemplazo *sol = equipo_replacement_algorithm_corregido(&e, vida_util_equipo);
     const gchar *nombre_archivo = NULL;
     if (fileNameReemplazo && GTK_IS_ENTRY(fileNameReemplazo)) {
         nombre_archivo = gtk_entry_get_text(GTK_ENTRY(fileNameReemplazo));
-    }    
+    }
+    
     gchar *nombre_base = NULL;
     if (nombre_archivo && *nombre_archivo) {
         if (g_str_has_suffix(nombre_archivo, ".csv") || g_str_has_suffix(nombre_archivo, ".tex")) {
@@ -964,18 +1068,15 @@ void on_calc_reemplazo_clicked(GtkButton *button, gpointer data) {
         nombre_base = g_strdup("reporte_reemplazo");
     }
     gchar *nombre_tex = g_strconcat(nombre_base, ".tex", NULL);
-    gchar *nombre_csv = g_strconcat(nombre_base, ".csv", NULL);
-    generar_reporte_latex_corregido(&e, vida_util_equipo, sol, nombre_tex);
-    
-    // Guardar CSV
+    generar_reporte_latex_corregido(&e, vida_util_equipo, sol, nombre_tex);    
     gchar *path = set_path_csv();
     gboolean saved = save_to_csv(path);
-    
-    // Compilar y mostrar PDF
-    gchar *tex_file = g_build_filename(g_get_current_dir(), "ReportsEquipment", "reporte_reemplazo.tex", NULL);
+    gchar *tex_file = g_build_filename(g_get_current_dir(), "ReportsEquipment", nombre_tex, NULL);
     compile_latex_file(tex_file);
     
     // Liberar memoria
+    g_free(nombre_base);
+    g_free(nombre_tex);
     g_ptr_array_free(sol->planes, TRUE);
     g_free(sol);
     g_free(path);

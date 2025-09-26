@@ -1,0 +1,155 @@
+\documentclass[12pt]{article}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage{longtable}
+\usepackage{subcaption}
+\usepackage{wrapfig}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+\title{Proyecto 3: Reemplazo de Equipos}
+\author{Emily Sanchez \\ Viviana Vargas \\[1cm] Curso: Investigación de Operaciones \\ II Semestre 2025}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\newpage
+\section*{Problema de Reemplazo de Equipos}
+El problema consiste en determinar el momento óptimo para reemplazar un equipo durante un período de planificación.\\
+\textbf{Fórmula del costo:} $C_{t,j} = \text{Compra} + \sum_{k=1}^{j-t} \text{Mantenimiento}_k - \text{Venta}_{j-t}$\\
+\textbf{Algoritmo:} Programación Dinámica hacia atrás\\
+\textbf{Función recursiva:} $g(t) = \min\limits_{j=t+1}^{\min(t+\text{vida útil}, n)} \{C_{t,j} + g(j)\}$ con $g(n) = 0$\\
+
+\section*{Datos del Problema}
+\begin{itemize}
+\item Costo inicial (compra): \$500,00
+\item Plazo del proyecto: 5 años
+\item Vida útil del equipo: 3 años
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Datos del equipo por año de uso}
+\begin{tabular}{ccc}
+\toprule
+Año de Uso & Mantenimiento & Valor Residual \\
+\midrule
+1 & \$30,00 & \$400,00 \\
+2 & \$40,00 & \$300,00 \\
+3 & \$60,00 & \$250,00 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\clearpage
+\section*{Cálculo de Costos $C_{t,j}$}
+\begin{longtable}{cccc}
+\caption{Cálculo detallado de costos por período}\\
+\toprule
+Período (t-j) & Duración & Fórmula & Costo \\
+\midrule
+\endfirsthead
+0-1 & 1 año & $500 + 30 - 400$ & \$130,00 \\
+0-2 & 2 años & $500 + 30 + 40 - 300$ & \$270,00 \\
+0-3 & 3 años & $500 + 30 + 40 + 60 - 250$ & \$380,00 \\
+1-2 & 1 año & $500 + 30 - 400$ & \$130,00 \\
+1-3 & 2 años & $500 + 30 + 40 - 300$ & \$270,00 \\
+1-4 & 3 años & $500 + 30 + 40 + 60 - 250$ & \$380,00 \\
+2-3 & 1 año & $500 + 30 - 400$ & \$130,00 \\
+2-4 & 2 años & $500 + 30 + 40 - 300$ & \$270,00 \\
+2-5 & 3 años & $500 + 30 + 40 + 60 - 250$ & \$380,00 \\
+3-4 & 1 año & $500 + 30 - 400$ & \$130,00 \\
+3-5 & 2 años & $500 + 30 + 40 - 300$ & \$270,00 \\
+4-5 & 1 año & $500 + 30 - 400$ & \$130,00 \\
+\bottomrule
+\end{longtable}
+
+\clearpage
+\section*{Cálculo de $g(t)$ (Programación Dinámica)}
+\begin{itemize}
+\item $g(5) = 0$ (caso base)
+\item $g(4) = \min\{ C_{4,5} + g(5) = 130,00\} = \$130,00$
+\item $g(3) = \min\{ C_{3,4} + g(4) = 260,00, C_{3,5} + g(5) = 270,00\} = \$260,00$
+\item $g(2) = \min\{ C_{2,3} + g(3) = 390,00, C_{2,4} + g(4) = 400,00, C_{2,5} + g(5) = 380,00\} = \$380,00$
+\item $g(1) = \min\{ C_{1,2} + g(2) = 510,00, C_{1,3} + g(3) = 530,00, C_{1,4} + g(4) = 510,00\} = \$510,00$
+\item $g(0) = \min\{ C_{0,1} + g(1) = 640,00, C_{0,2} + g(2) = 650,00, C_{0,3} + g(3) = 640,00\} = \$640,00$
+\end{itemize}
+
+\clearpage
+\section*{Solución Óptima}
+\textbf{Costo mínimo total:} \$640,00\\
+\textbf{Planes óptimos encontrados:} 3\\
+\subsection*{Grafos de Planes Óptimos}
+A continuación se presentan los grafos de \emph{saltos de rana} para cada plan óptimo encontrado:\\
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{ReemplazoEquipos_plan_1.png}
+\caption{Plan Óptimo 1: \texttt{0-1-2-5}}
+\label{fig:plan1}
+\end{figure}
+
+\textbf{Plan 1:} \texttt{0-1-2-5}\\
+\begin{itemize}\small
+\item Período 0-1: 1 año, Costo: \$130,00
+\item Período 1-2: 1 año, Costo: \$130,00
+\item Período 2-5: 3 años, Costo: \$380,00
+\end{itemize}
+\\
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{ReemplazoEquipos_plan_2.png}
+\caption{Plan Óptimo 2: \texttt{0-1-4-5}}
+\label{fig:plan2}
+\end{figure}
+
+\textbf{Plan 2:} \texttt{0-1-4-5}\\
+\begin{itemize}\small
+\item Período 0-1: 1 año, Costo: \$130,00
+\item Período 1-4: 3 años, Costo: \$380,00
+\item Período 4-5: 1 año, Costo: \$130,00
+\end{itemize}
+\\
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{ReemplazoEquipos_plan_3.png}
+\caption{Plan Óptimo 3: \texttt{0-3-4-5}}
+\label{fig:plan3}
+\end{figure}
+
+\textbf{Plan 3:} \texttt{0-3-4-5}\\
+\begin{itemize}\small
+\item Período 0-3: 3 años, Costo: \$380,00
+\item Período 3-4: 1 año, Costo: \$130,00
+\item Período 4-5: 1 año, Costo: \$130,00
+\end{itemize}
+\\
+\subsection*{Resumen de Planes}
+\begin{itemize}
+\item \textbf{Plan 1:} 0-1-2-5
+\item \textbf{Plan 2:} 0-1-4-5
+\item \textbf{Plan 3:} 0-3-4-5
+\end{itemize}
+\begin{table}[H]
+\centering
+\caption{Resumen de costos mínimos}
+\begin{tabular}{cc}
+\toprule
+Año (t) & Costo Mínimo $g(t)$ \\
+\midrule
+4 & \$130,00 \\
+3 & \$260,00 \\
+2 & \$380,00 \\
+1 & \$510,00 \\
+0 & \$640,00 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

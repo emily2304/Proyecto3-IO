@@ -1,0 +1,22 @@
+digraph PlanOptimo {
+    rankdir=LR;
+    node [shape=circle, style=filled, fillcolor=lightgray, fontname=Arial, width=0.6, height=0.6];
+    edge [color=black, arrowhead=vee, arrowsize=0.8];
+
+    // Todos los nodos (años)
+    "0" [fillcolor=green, fontcolor=white];  // Inicio\n    "1" [fillcolor=lightblue];               // En plan óptimo\n    "2" [fillcolor=white];                     // No usado\n    "3" [fillcolor=white];                     // No usado\n    "4" [fillcolor=lightblue];               // En plan óptimo\n    "5" [fillcolor=red, fontcolor=white];    // Fin\n
+    // Flechas del plan óptimo
+    "0" -> "1" [label="1 año", color=darkgreen, penwidth=2.5, fontsize=10, fontcolor=darkgreen];
+    "1" -> "4" [label="3 años", color=darkgreen, penwidth=2.5, fontsize=10, fontcolor=darkgreen];
+    "4" -> "5" [label="1 año", color=darkgreen, penwidth=2.5, fontsize=10, fontcolor=darkgreen];
+
+    // Progresión temporal (flechas grises)
+    "0" -> "1" [color=gray, style=dotted, arrowhead=none, constraint=false];
+    "1" -> "2" [color=gray, style=dotted, arrowhead=none, constraint=false];
+    "2" -> "3" [color=gray, style=dotted, arrowhead=none, constraint=false];
+    "3" -> "4" [color=gray, style=dotted, arrowhead=none, constraint=false];
+    "4" -> "5" [color=gray, style=dotted, arrowhead=none, constraint=false];
+
+    // Mejorar layout
+    { rank=same; "0" "1" "2" "3" "4" "5" }
+}

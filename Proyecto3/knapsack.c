@@ -332,7 +332,7 @@ int knapsack_unbounded(int n, int W, KnapsackItem objs[]) {
     return dp[W];
 }
 
-// --------- LATEX --------- 
+// --------- LATEX ---------  
 
 void compile_latex_file(const gchar *tex_file) {
     gchar *dir = g_path_get_dirname(tex_file);

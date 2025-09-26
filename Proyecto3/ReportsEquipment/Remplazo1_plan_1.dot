@@ -1,0 +1,12 @@
+digraph PlanOptimo {
+    rankdir=LR;
+    node [shape=circle, style=filled, fillcolor=lightblue, fontname=Arial];
+    edge [color=darkgreen, arrowhead=vee, arrowsize=0.8];
+
+    "0" [fillcolor=green, fontcolor=white];
+    "2";
+    "5" [fillcolor=red, fontcolor=white];
+
+    "0" -> "2" [label="2 años", fontsize=10];
+    "2" -> "5" [label="3 años", fontsize=10];
+}
