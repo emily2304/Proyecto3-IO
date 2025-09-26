@@ -312,7 +312,6 @@ void build_table(int plazo, gboolean profit) {
     gtk_widget_show_all(grid);
 }
 
-
 static gboolean read_table(Equipment *out) {
     if (!out) {
         return FALSE;
@@ -551,20 +550,17 @@ static gboolean load_from_csv(const char *path) {
     return TRUE;
 }
 
-double calcular_costo_periodo_correcto(const Equipment *e, int inicio, int fin, int vida_util_equipo, gboolean use_profit)
-{
-    if (fin <= inicio) {
-        return 0.0;
-    }
-    int duracion = fin - inicio;
+double calcular_costo_periodo_correcto(Equipment *e, int inicio, int fin, int vida_util_equipo) {
+    if (fin <= inicio) return 0.0;
+    int duracion = fin - inicio; 
     if (duracion > vida_util_equipo) {
-        return 1e20;
+        return 1e20; 
     }
-
-    double costo_total = e->costo[0]; 
-    for (int i = 0; i < duracion && i < e->n; i++) {
-        costo_total += e->costo_mant[i];
-        if (use_profit) costo_total -= e->beneficio[i]; 
+    double costo_total = e->costo[0];
+    for (int i = 0; i < duracion; i++) {
+        if (i < e->n) { 
+            costo_total += e->costo_mant[i];
+        }
     }
     if (duracion > 0 && duracion <= e->n) {
         costo_total -= e->valor_residual[duracion - 1];
@@ -577,7 +573,6 @@ SolucionReemplazo* equipo_replacement_algorithm_corregido(Equipment *e, int vida
     int plazo_proyecto = e->n; 
     SolucionReemplazo *sol = g_new0(SolucionReemplazo, 1);
     sol->planes = g_ptr_array_new_with_free_func(g_free);
-    gboolean use_profit = is_profit_enabled();
     
     g_print("Plazo del proyecto (vidaSpin): %d años\n", plazo_proyecto);
     g_print("Vida útil del equipo (plazoSpin): %d años\n", vida_util_equipo);
@@ -597,7 +592,7 @@ SolucionReemplazo* equipo_replacement_algorithm_corregido(Equipment *e, int vida
         for (int j = t + 1; j <= plazo_proyecto; j++) {
             int duracion = j - t;
             if (duracion > vida_util_equipo) continue;
-            double costo_actual = calcular_costo_periodo_correcto(e, t, j, vida_util_equipo, use_profit);
+            double costo_actual = calcular_costo_periodo_correcto(e, t, j, vida_util_equipo);
             if (costo_actual >= 1e20) continue;
             double costo_total = costo_actual + g[j];
             g_print("g(%d): C_%d,%d + g(%d) = %.2f + %.2f = %.2f\n", t, t, j, j, costo_actual, g[j], costo_total);
@@ -668,7 +663,6 @@ gboolean generar_grafo_saltos_rana_completo(const char *plan_optimo, const char 
         return FALSE;
     }
     
-    // Crear archivo DOT para Graphviz
     gchar *dot_filename = g_strconcat(filename, ".dot", NULL);
     FILE *dot_file = fopen(dot_filename, "w");
     if (!dot_file) {
@@ -676,19 +670,13 @@ gboolean generar_grafo_saltos_rana_completo(const char *plan_optimo, const char 
         g_strfreev(saltos);
         return FALSE;
     }
-    
-    // Escribir archivo DOT
     fprintf(dot_file, "digraph PlanOptimo {\n");
     fprintf(dot_file, "    rankdir=LR;\n");
     fprintf(dot_file, "    node [shape=circle, style=filled, fillcolor=lightblue, fontname=Arial];\n");
     fprintf(dot_file, "    edge [color=darkgreen, arrowhead=vee, arrowsize=0.8];\n\n");
-    
-    // Crear todos los nodos desde 0 hasta año_maximo
     for (int i = 0; i <= año_maximo; i++) {
         gchar nodo_str[10];
         g_snprintf(nodo_str, sizeof(nodo_str), "%d", i);
-        
-        // Verificar si este nodo está en el plan óptimo
         gboolean en_plan = FALSE;
         int posicion_en_plan = -1;
         
@@ -702,24 +690,19 @@ gboolean generar_grafo_saltos_rana_completo(const char *plan_optimo, const char 
         
         if (en_plan) {
             if (posicion_en_plan == 0) {
-                // Nodo inicial
                 fprintf(dot_file, "    \"%d\" [fillcolor=green, fontcolor=white];\n", i);
             } else if (posicion_en_plan == num_nodos_plan - 1) {
-                // Nodo final
                 fprintf(dot_file, "    \"%d\" [fillcolor=red, fontcolor=white];\n", i);
             } else {
-                // Nodo intermedio del plan
                 fprintf(dot_file, "    \"%d\" [fillcolor=orange];\n", i);
             }
         } else {
-            // Nodo no utilizado en el plan (color más tenue)
             fprintf(dot_file, "    \"%d\" [fillcolor=lightgray, color=gray, fontcolor=black];\n", i);
         }
     }
     
     fprintf(dot_file, "\n");
     
-    // Crear conexiones del plan óptimo (en verde y más gruesas)
     for (int i = 0; i < num_nodos_plan - 1; i++) {
         int inicio = atoi(saltos[i]);
         int fin = atoi(saltos[i+1]);
@@ -729,11 +712,9 @@ gboolean generar_grafo_saltos_rana_completo(const char *plan_optimo, const char 
                 inicio, fin, duracion, duracion > 1 ? "s" : "");
     }
     
-    // Crear conexiones implícitas entre nodos consecutivos no utilizados (en gris y punteadas)
     for (int i = 0; i < año_maximo; i++) {
         gboolean conexion_existe = FALSE;
         
-        // Verificar si ya existe una conexión en el plan óptimo
         for (int j = 0; j < num_nodos_plan - 1; j++) {
             int inicio_plan = atoi(saltos[j]);
             int fin_plan = atoi(saltos[j+1]);
@@ -744,7 +725,6 @@ gboolean generar_grafo_saltos_rana_completo(const char *plan_optimo, const char 
             }
         }
         
-        // Solo crear conexión punteada si no existe en el plan óptimo
         if (!conexion_existe) {
             fprintf(dot_file, "    \"%d\" -> \"%d\" [style=dotted, color=gray, arrowhead=empty, arrowsize=0.5, constraint=false];\n", i, i + 1);
         }
@@ -939,13 +919,7 @@ void generar_reporte_latex_corregido(Equipment *e, int vida_util, SolucionReempl
     fprintf(f, "\\item \\textbf{Inflación:} Los precios de adquisición y mantenimiento cambian según el año.\\\\\n");
     fprintf(f, "\\item \\textbf{Nuevas tecnologías:} Equipos más modernos pueden ofrecer mejores rendimientos y menores costos operativos.\\\\\n");
     fprintf(f, "\\end{itemize}\n");
-    gboolean use_profit = is_profit_enabled();
-    if (use_profit) {
-        fprintf(f, "\\textbf{Fórmula del costo:} $C_{t,j} = \\text{Compra} + \\sum \\text{Mantenimiento}_k - \\sum \\text{Profit}_k - \\text{Venta}_{j-t}$\\\\\n");
-    } else {
-        fprintf(f, "\\textbf{Fórmula del costo:} $C_{t,j} = \\text{Compra} + \\sum \\text{Mantenimiento}_k - \\text{Venta}_{j-t}$\\\\\n");
-    }
-    //fprintf(f, "\\textbf{Fórmula del costo:} $C_{t,j} = \\text{Compra} + \\sum_{k=1}^{j-t} \\text{Mantenimiento}_k - \\text{Venta}_{j-t}$\\\\\n");
+    fprintf(f, "\\textbf{Fórmula del costo:} $C_{t,j} = \\text{Compra} + \\sum_{k=1}^{j-t} \\text{Mantenimiento}_k - \\text{Venta}_{j-t}$\\\\\n");
     fprintf(f, "\\textbf{Algoritmo:} Programación Dinámica \\\\\n");
     fprintf(f, "\\textbf{Función recursiva:} $g(t) = \\min\\limits_{j=t+1}^{\\min(t+\\text{vida útil}, n)} \\{C_{t,j} + g(j)\\}$ con $g(n) = 0$\\\\\n\n");
     
@@ -1000,21 +974,15 @@ void generar_reporte_latex_corregido(Equipment *e, int vida_util, SolucionReempl
         for (int j = t + 1; j <= e->n; j++) {
             int duracion = j - t;
             if (duracion <= vida_util_ajustada) {
-                double costo = calcular_costo_periodo_correcto(e, t, j, vida_util, use_profit);
-                fprintf(f, "%d-%d & %d año%s & $%.0f",t, j, duracion, duracion > 1 ? "s" : "", e->costo[0]);
-
-                for (int k = 0; k < duracion && k < e->n; k++) {
-                    fprintf(f, " + %.0f", e->costo_mant[k]);
-                }
-                if (use_profit) {
-                    for (int k = 0; k < duracion && k < e->n; k++) {
-                        fprintf(f, " - %.0f", e->beneficio[k]);
+                double costo = calcular_costo_periodo_correcto(e, t, j, vida_util);
+                fprintf(f, "%d-%d & %d año%s & $%.0f", t, j, duracion, duracion > 1 ? "s" : "", e->costo[0]);
+                for (int k = 0; k < duracion; k++) {
+                    if (k < e->n) {
+                        fprintf(f, " + %.0f", e->costo_mant[k]);
                     }
                 }
-
-                fprintf(f, " - %.0f$ & \\$%.2f \\\\\n",
-                        e->valor_residual[duracion - 1], costo);
-                            }
+                fprintf(f, " - %.0f$ & \\$%.2f \\\\\n", e->valor_residual[duracion - 1], costo);
+            }
         }
     }
     fprintf(f, "\\end{longtable}\n\n");
@@ -1041,7 +1009,7 @@ void generar_reporte_latex_corregido(Equipment *e, int vida_util, SolucionReempl
         for (int j = t + 1; j <= e->n; j++) {
             int duracion = j - t;
             if (duracion <= vida_util_ajustada) {
-                double costo_periodo = calcular_costo_periodo_correcto(e, t, j, vida_util, use_profit);
+                double costo_periodo = calcular_costo_periodo_correcto(e, t, j, vida_util);
                 double costo_total = costo_periodo + g_calculado[j];
                 
                 if (costo_total < min_costo - 1e-10) { 
@@ -1060,7 +1028,7 @@ void generar_reporte_latex_corregido(Equipment *e, int vida_util, SolucionReempl
         for (int j = t + 1; j <= e->n; j++) {
             int duracion = j - t;
             if (duracion <= vida_util_ajustada) {
-                double costo_periodo = calcular_costo_periodo_correcto(e, t, j, vida_util, use_profit);
+                double costo_periodo = calcular_costo_periodo_correcto(e, t, j, vida_util);
                 double costo_total = costo_periodo + g_calculado[j];
                 
                 if (count > 0) fprintf(f, ", ");
@@ -1179,7 +1147,7 @@ void generar_reporte_latex_corregido(Equipment *e, int vida_util, SolucionReempl
                         int inicio = atoi(saltos[j]);
                         int fin = atoi(saltos[j+1]);
                         int duracion = fin - inicio;
-                        double costo = calcular_costo_periodo_correcto(e, inicio, fin, vida_util, use_profit);
+                        double costo = calcular_costo_periodo_correcto(e, inicio, fin, vida_util);
                         fprintf(f, "\\item Período %d-%d: %d año%s, Costo: \\$%.2f\n", inicio, fin, duracion, duracion > 1 ? "s" : "", costo);
 
                     }

@@ -34,15 +34,15 @@ El objetivo es minimizar el costo promedio anual (o el valor presente de los cos
 \item \textbf{Inflación:} Los precios de adquisición y mantenimiento cambian según el año.\\
 \item \textbf{Nuevas tecnologías:} Equipos más modernos pueden ofrecer mejores rendimientos y menores costos operativos.\\
 \end{itemize}
-\textbf{Fórmula del costo:} $C_{t,j} = \text{Compra} + \sum_{k=1}^{j-t} \text{Mantenimiento}_k - \text{Venta}_{j-t}$\\
+\textbf{Fórmula del costo:} $C_{t,j} = \text{Compra} + \sum \text{Mantenimiento}_k - \text{Venta}_{j-t}$\\
 \textbf{Algoritmo:} Programación Dinámica \\
 \textbf{Función recursiva:} $g(t) = \min\limits_{j=t+1}^{\min(t+\text{vida útil}, n)} \{C_{t,j} + g(j)\}$ con $g(n) = 0$\\
 
 \section*{Datos del Problema}
 \begin{itemize}
 \item Costo inicial (compra): \$500.00
-\item Plazo del proyecto: 5 años
-\item Vida útil del equipo: 3 años
+\item Plazo del proyecto: 3 años
+\item Vida útil del equipo: 5 años
 \end{itemize}
 
 \begin{table}[H]
@@ -82,81 +82,38 @@ Período (t-j) & Duración & Fórmula & Costo \\
 0-3 & 3 años & $500 + 30 + 40 + 60 - 250$ & \$380.00 \\
 1-2 & 1 año & $500 + 30 - 400$ & \$130.00 \\
 1-3 & 2 años & $500 + 30 + 40 - 300$ & \$270.00 \\
-1-4 & 3 años & $500 + 30 + 40 + 60 - 250$ & \$380.00 \\
 2-3 & 1 año & $500 + 30 - 400$ & \$130.00 \\
-2-4 & 2 años & $500 + 30 + 40 - 300$ & \$270.00 \\
-2-5 & 3 años & $500 + 30 + 40 + 60 - 250$ & \$380.00 \\
-3-4 & 1 año & $500 + 30 - 400$ & \$130.00 \\
-3-5 & 2 años & $500 + 30 + 40 - 300$ & \$270.00 \\
-4-5 & 1 año & $500 + 30 - 400$ & \$130.00 \\
 \end{longtable}
 
 \clearpage
 \section*{Cálculo de $g(t)$ (Programación Dinámica)}
 \begin{itemize}
-\item $g(5) = 0$ (caso base)
-\item $g(4) = \min\{ \mathbf{C_{4,5} + g(5) = 130.00}\} = \$130.00$ \textbf{(j=5)}
-\item $g(3) = \min\{ \mathbf{C_{3,4} + g(4) = 260.00}, C_{3,5} + g(5) = 270.00\} = \$260.00$ \textbf{(j=4)}
-\item $g(2) = \min\{ C_{2,3} + g(3) = 390.00, C_{2,4} + g(4) = 400.00, \mathbf{C_{2,5} + g(5) = 380.00}\} = \$380.00$ \textbf{(j=5)}
-\item $g(1) = \min\{ \mathbf{C_{1,2} + g(2) = 510.00}, C_{1,3} + g(3) = 530.00, \mathbf{C_{1,4} + g(4) = 510.00}\} = \$510.00$ \textbf{(Empate: j=2, j=4)}
-\item $g(0) = \min\{ \mathbf{C_{0,1} + g(1) = 640.00}, C_{0,2} + g(2) = 650.00, \mathbf{C_{0,3} + g(3) = 640.00}\} = \$640.00$ \textbf{(Empate: j=1, j=3)}
+\item $g(3) = 0$ (caso base)
+\item $g(2) = \min\{ \mathbf{C_{2,3} + g(3) = 130.00}\} = \$130.00$ \textbf{(j=3)}
+\item $g(1) = \min\{ \mathbf{C_{1,2} + g(2) = 260.00}, C_{1,3} + g(3) = 270.00\} = \$260.00$ \textbf{(j=2)}
+\item $g(0) = \min\{ C_{0,1} + g(1) = 390.00, C_{0,2} + g(2) = 400.00, \mathbf{C_{0,3} + g(3) = 380.00}\} = \$380.00$ \textbf{(j=3)}
 \end{itemize}
 
 \subsection*{Empates}
 Se han resaltado en \textbf{negrita} las opciones óptimas.\\
-\textbf{Empates encontrados:}
-\begin{itemize}
-\item En $g(0)$: múltiples opciones óptimas con j = 1, 3 (costo: \$640.00)
-\item En $g(1)$: múltiples opciones óptimas con j = 2, 4 (costo: \$510.00)
-\end{itemize}
-Los empates indican que existen múltiples estrategias óptimas para reemplazar el equipo.\\
+\textbf{No se encontraron empates.} Existe una única estrategia óptima para cada año de inicio.\\
 \clearpage
 \section*{Solución Óptima}
-\textbf{Costo mínimo total:} \$640.00\\
-\textbf{Planes óptimos encontrados:} 3
+\textbf{Costo mínimo total:} \$380.00\\
+\textbf{Planes óptimos encontrados:} 1
 \subsection*{Grafos de Planes Óptimos}
 A continuación se presentan los grafos de \emph{saltos de rana} para cada plan óptimo encontrado.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{REporteRe1_plan_1.png}
-\caption{Plan Óptimo 1: \texttt{0-1-2-5}}
+\includegraphics[width=0.8\textwidth]{Reemplazo_bici_plan_1.png}
+\caption{Plan Óptimo 1: \texttt{0-3}}
 \label{fig:plan1}
 \end{figure}
 
-\textbf{Plan 1:} \texttt{0-1-2-5}
-\begin{itemize}\small
-\item Período 0-1: 1 año, Costo: \$130.00
-\item Período 1-2: 1 año, Costo: \$130.00
-\item Período 2-5: 3 años, Costo: \$380.00
-\end{itemize}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{REporteRe1_plan_2.png}
-\caption{Plan Óptimo 2: \texttt{0-1-4-5}}
-\label{fig:plan2}
-\end{figure}
-
-\textbf{Plan 2:} \texttt{0-1-4-5}
-\begin{itemize}\small
-\item Período 0-1: 1 año, Costo: \$130.00
-\item Período 1-4: 3 años, Costo: \$380.00
-\item Período 4-5: 1 año, Costo: \$130.00
-\end{itemize}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{REporteRe1_plan_3.png}
-\caption{Plan Óptimo 3: \texttt{0-3-4-5}}
-\label{fig:plan3}
-\end{figure}
-
-\textbf{Plan 3:} \texttt{0-3-4-5}
+\textbf{Plan 1:} \texttt{0-3}
 \begin{itemize}\small
 \item Período 0-3: 3 años, Costo: \$380.00
-\item Período 3-4: 1 año, Costo: \$130.00
-\item Período 4-5: 1 año, Costo: \$130.00
 \end{itemize}
 
 \end{document}

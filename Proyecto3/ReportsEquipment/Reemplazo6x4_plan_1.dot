@@ -1,0 +1,16 @@
+digraph PlanOptimo {
+    rankdir=LR;
+    node [shape=circle, style=filled, fillcolor=lightblue, fontname=Arial];
+    edge [color=darkgreen, arrowhead=vee, arrowsize=0.8];
+
+    "0" [fillcolor=green, fontcolor=white];
+    "1" [fillcolor=orange];
+    "2" [fillcolor=orange];
+    "3" [fillcolor=orange];
+    "4" [fillcolor=red, fontcolor=white];
+
+    "0" -> "1" [label="1 año", fontsize=10, color=darkgreen, penwidth=2.0];
+    "1" -> "2" [label="1 año", fontsize=10, color=darkgreen, penwidth=2.0];
+    "2" -> "3" [label="1 año", fontsize=10, color=darkgreen, penwidth=2.0];
+    "3" -> "4" [label="1 año", fontsize=10, color=darkgreen, penwidth=2.0];
+}

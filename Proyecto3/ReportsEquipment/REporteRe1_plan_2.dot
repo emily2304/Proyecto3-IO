@@ -5,8 +5,8 @@ digraph PlanOptimo {
 
     "0" [fillcolor=green, fontcolor=white];
     "1" [fillcolor=orange];
-    "2" [fillcolor=lightgray, color=gray, fontcolor=gray];
-    "3" [fillcolor=lightgray, color=gray, fontcolor=gray];
+    "2" [fillcolor=lightgray, color=gray, fontcolor=black];
+    "3" [fillcolor=lightgray, color=gray, fontcolor=black];
     "4" [fillcolor=orange];
     "5" [fillcolor=red, fontcolor=white];
 

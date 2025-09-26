@@ -112,7 +112,7 @@
             <property name="height-request">20</property>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Term </property>
+            <property name="label" translatable="yes">Lifespan</property>
           </object>
           <packing>
             <property name="x">291</property>
@@ -139,7 +139,7 @@
             <property name="height-request">20</property>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Lifespan</property>
+            <property name="label" translatable="yes">Term</property>
           </object>
           <packing>
             <property name="x">429</property>
