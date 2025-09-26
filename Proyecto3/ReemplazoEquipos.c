@@ -550,7 +550,7 @@ static gboolean load_from_csv(const char *path) {
     return TRUE;
 }
 
-double calcular_costo_periodo_correcto(Equipment *e, int inicio, int fin, int vida_util_equipo) {
+double calcular_costo_periodo_correcto(Equipment *e, int inicio, int fin, int vida_util_equipo, gboolean use_profit) {
     if (fin <= inicio) return 0.0;
     int duracion = fin - inicio; 
     if (duracion > vida_util_equipo) {
@@ -560,6 +560,7 @@ double calcular_costo_periodo_correcto(Equipment *e, int inicio, int fin, int vi
     for (int i = 0; i < duracion; i++) {
         if (i < e->n) { 
             costo_total += e->costo_mant[i];
+            if (use_profit) costo_total -= e->beneficio[i]; 
         }
     }
     if (duracion > 0 && duracion <= e->n) {
@@ -573,6 +574,7 @@ SolucionReemplazo* equipo_replacement_algorithm_corregido(Equipment *e, int vida
     int plazo_proyecto = e->n; 
     SolucionReemplazo *sol = g_new0(SolucionReemplazo, 1);
     sol->planes = g_ptr_array_new_with_free_func(g_free);
+    gboolean use_profit = is_profit_enabled();
     
     g_print("Plazo del proyecto (vidaSpin): %d años\n", plazo_proyecto);
     g_print("Vida útil del equipo (plazoSpin): %d años\n", vida_util_equipo);
@@ -592,7 +594,7 @@ SolucionReemplazo* equipo_replacement_algorithm_corregido(Equipment *e, int vida
         for (int j = t + 1; j <= plazo_proyecto; j++) {
             int duracion = j - t;
             if (duracion > vida_util_equipo) continue;
-            double costo_actual = calcular_costo_periodo_correcto(e, t, j, vida_util_equipo);
+            double costo_actual = calcular_costo_periodo_correcto(e, t, j, vida_util_equipo, use_profit);
             if (costo_actual >= 1e20) continue;
             double costo_total = costo_actual + g[j];
             g_print("g(%d): C_%d,%d + g(%d) = %.2f + %.2f = %.2f\n", t, t, j, j, costo_actual, g[j], costo_total);
@@ -919,7 +921,13 @@ void generar_reporte_latex_corregido(Equipment *e, int vida_util, SolucionReempl
     fprintf(f, "\\item \\textbf{Inflación:} Los precios de adquisición y mantenimiento cambian según el año.\\\\\n");
     fprintf(f, "\\item \\textbf{Nuevas tecnologías:} Equipos más modernos pueden ofrecer mejores rendimientos y menores costos operativos.\\\\\n");
     fprintf(f, "\\end{itemize}\n");
-    fprintf(f, "\\textbf{Fórmula del costo:} $C_{t,j} = \\text{Compra} + \\sum_{k=1}^{j-t} \\text{Mantenimiento}_k - \\text{Venta}_{j-t}$\\\\\n");
+    gboolean use_profit = is_profit_enabled();
+    if (use_profit) {
+        fprintf(f, "\\textbf{Fórmula del costo:} $C_{t,j} = \\text{Compra} + \\sum \\text{Mantenimiento}_k - \\sum \\text{Profit}_k - \\text{Venta}_{j-t}$\\\\\n");
+    } else {
+        fprintf(f, "\\textbf{Fórmula del costo:} $C_{t,j} = \\text{Compra} + \\sum \\text{Mantenimiento}_k - \\text{Venta}_{j-t}$\\\\\n");
+    }
+    //fprintf(f, "\\textbf{Fórmula del costo:} $C_{t,j} = \\text{Compra} + \\sum_{k=1}^{j-t} \\text{Mantenimiento}_k - \\text{Venta}_{j-t}$\\\\\n");
     fprintf(f, "\\textbf{Algoritmo:} Programación Dinámica \\\\\n");
     fprintf(f, "\\textbf{Función recursiva:} $g(t) = \\min\\limits_{j=t+1}^{\\min(t+\\text{vida útil}, n)} \\{C_{t,j} + g(j)\\}$ con $g(n) = 0$\\\\\n\n");
     
@@ -934,13 +942,13 @@ void generar_reporte_latex_corregido(Equipment *e, int vida_util, SolucionReempl
     fprintf(f, "\\begin{table}[H]\n");
     fprintf(f, "\\centering\n");
     fprintf(f, "\\caption{Datos del equipo por año de uso}\n");
-    fprintf(f, "\\begin{tabular}{ccc}\n");
+    fprintf(f, "\\begin{tabular}{cccc}\n");
     fprintf(f, "\\toprule\n");
-    fprintf(f, "Año de Uso & Mantenimiento & Valor Residual \\\\\n");
+    fprintf(f, "Año de Uso & Mantenimiento & Valor Residual & Beneficio \\\\\n");
     fprintf(f, "\\midrule\n");
     for (int i = 0; i < e->n && i < vida_util_ajustada; i++) {
-        fprintf(f, "%d & \\$%.2f & \\$%.2f \\\\\n", 
-                i + 1, e->costo_mant[i], e->valor_residual[i]);
+        fprintf(f, "%d & \\$%.2f & \\$%.2f & \\$%.2f \\\\\n", 
+                i + 1, e->costo_mant[i], e->valor_residual[i], e->beneficio[i]);
     }
     fprintf(f, "\\bottomrule\n");
     fprintf(f, "\\end{tabular}\n");
@@ -974,11 +982,16 @@ void generar_reporte_latex_corregido(Equipment *e, int vida_util, SolucionReempl
         for (int j = t + 1; j <= e->n; j++) {
             int duracion = j - t;
             if (duracion <= vida_util_ajustada) {
-                double costo = calcular_costo_periodo_correcto(e, t, j, vida_util);
+                double costo = calcular_costo_periodo_correcto(e, t, j, vida_util, use_profit);
                 fprintf(f, "%d-%d & %d año%s & $%.0f", t, j, duracion, duracion > 1 ? "s" : "", e->costo[0]);
                 for (int k = 0; k < duracion; k++) {
                     if (k < e->n) {
                         fprintf(f, " + %.0f", e->costo_mant[k]);
+                    }
+                }
+                if (use_profit) {
+                    for (int k = 0; k < duracion && k < e->n; k++) {
+                        fprintf(f, " - %.0f", e->beneficio[k]);
                     }
                 }
                 fprintf(f, " - %.0f$ & \\$%.2f \\\\\n", e->valor_residual[duracion - 1], costo);
@@ -1009,7 +1022,7 @@ void generar_reporte_latex_corregido(Equipment *e, int vida_util, SolucionReempl
         for (int j = t + 1; j <= e->n; j++) {
             int duracion = j - t;
             if (duracion <= vida_util_ajustada) {
-                double costo_periodo = calcular_costo_periodo_correcto(e, t, j, vida_util);
+                double costo_periodo = calcular_costo_periodo_correcto(e, t, j, vida_util, use_profit);
                 double costo_total = costo_periodo + g_calculado[j];
                 
                 if (costo_total < min_costo - 1e-10) { 
@@ -1028,7 +1041,7 @@ void generar_reporte_latex_corregido(Equipment *e, int vida_util, SolucionReempl
         for (int j = t + 1; j <= e->n; j++) {
             int duracion = j - t;
             if (duracion <= vida_util_ajustada) {
-                double costo_periodo = calcular_costo_periodo_correcto(e, t, j, vida_util);
+                double costo_periodo = calcular_costo_periodo_correcto(e, t, j, vida_util, use_profit);
                 double costo_total = costo_periodo + g_calculado[j];
                 
                 if (count > 0) fprintf(f, ", ");
@@ -1147,7 +1160,7 @@ void generar_reporte_latex_corregido(Equipment *e, int vida_util, SolucionReempl
                         int inicio = atoi(saltos[j]);
                         int fin = atoi(saltos[j+1]);
                         int duracion = fin - inicio;
-                        double costo = calcular_costo_periodo_correcto(e, inicio, fin, vida_util);
+                        double costo = calcular_costo_periodo_correcto(e, inicio, fin, vida_util, use_profit);
                         fprintf(f, "\\item Período %d-%d: %d año%s, Costo: \\$%.2f\n", inicio, fin, duracion, duracion > 1 ? "s" : "", costo);
 
                     }

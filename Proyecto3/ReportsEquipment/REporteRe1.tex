@@ -34,7 +34,7 @@ El objetivo es minimizar el costo promedio anual (o el valor presente de los cos
 \item \textbf{Inflación:} Los precios de adquisición y mantenimiento cambian según el año.\\
 \item \textbf{Nuevas tecnologías:} Equipos más modernos pueden ofrecer mejores rendimientos y menores costos operativos.\\
 \end{itemize}
-\textbf{Fórmula del costo:} $C_{t,j} = \text{Compra} + \sum_{k=1}^{j-t} \text{Mantenimiento}_k - \text{Venta}_{j-t}$\\
+\textbf{Fórmula del costo:} $C_{t,j} = \text{Compra} + \sum \text{Mantenimiento}_k - \text{Venta}_{j-t}$\\
 \textbf{Algoritmo:} Programación Dinámica \\
 \textbf{Función recursiva:} $g(t) = \min\limits_{j=t+1}^{\min(t+\text{vida útil}, n)} \{C_{t,j} + g(j)\}$ con $g(n) = 0$\\
 
@@ -48,13 +48,13 @@ El objetivo es minimizar el costo promedio anual (o el valor presente de los cos
 \begin{table}[H]
 \centering
 \caption{Datos del equipo por año de uso}
-\begin{tabular}{ccc}
+\begin{tabular}{cccc}
 \toprule
-Año de Uso & Mantenimiento & Valor Residual \\
+Año de Uso & Mantenimiento & Valor Residual & Beneficio \\
 \midrule
-1 & \$30.00 & \$400.00 \\
-2 & \$40.00 & \$300.00 \\
-3 & \$60.00 & \$250.00 \\
+1 & \$30.00 & \$400.00 & \$0.00 \\
+2 & \$40.00 & \$300.00 & \$0.00 \\
+3 & \$60.00 & \$250.00 & \$0.00 \\
 \bottomrule
 \end{tabular}
 \end{table}
